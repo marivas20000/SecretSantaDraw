@@ -460,12 +460,12 @@
 
         // API Base URL - ЗАМЕНИТЕ НА ВАШ СЕРВЕР
         // Для локальной разработки: 'http://localhost:8000/api'
-        // Для продакшн: 'https://your-domain.com/api'
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000/api'
-            : 'https://your-api-url.com/api';
-        
-        const USE_DEMO_MODE = true; // Установите false для работы с реальным API
+        // Для продакшн: замените на ваш реальный URL
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://127.0.0.1:8002/api'
+            : 'https://secretsantadrawprivate.onrender.com/api';
+
+        const USE_DEMO_MODE = false; // Включен реальный API режим
 
         // Навигация между экранами
         function showScreen(screenId) {
