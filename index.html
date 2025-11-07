@@ -571,6 +571,16 @@
 
         const BOT_USERNAME = 'SecretSantaDrawBot'; // Замените на имя вашего бота
 
+        // Добавьте эту функцию:
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ru-RU', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        }
+
         // Инициализация
         window.addEventListener('load', async () => {
             // Получаем данные пользователя из Telegram
@@ -1038,4 +1048,5 @@
     </script>
 </body>
 </html>
+
 
