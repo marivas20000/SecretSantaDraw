@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тайный Санта 🎅</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .room-code {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .room-code h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .room-code .code {
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 4px;
+            font-family: monospace;
+        }
+
+        .participants {
+            margin-top: 20px;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .participant-wish {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .assignment-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .assignment-card h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .assignment-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .gift-icon {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎅 Тайный Санта</h1>
+            <p>Создай новогоднее настроение!</p>
+        </div>
+
+        <!-- Главное меню -->
+        <div id="mainMenu" class="card">
+            <button class="btn btn-primary" onclick="showCreateRoom()">
+                🎁 Создать комнату
+            </button>
+            <button class="btn btn-secondary" onclick="showJoinRoom()">
+                🚪 Присоединиться к комнате
+            </button>
+            
+            <div class="info-box">
+                <h4>Как играть:</h4>
+                <p>1. Создайте комнату или присоединитесь к существующей<br>
+                2. Укажите свои пожелания к подарку<br>
+                3. Дождитесь всех участников<br>
+                4. Получите своего получателя подарка<br>
+                5. Подготовьте подарок и обменяйтесь в назначенный день!</p>
+            </div>
+        </div>
+
+        <!-- Создание комнаты -->
+        <div id="createRoomScreen" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Создание комнаты</h2>
+                
+                <div class="input-group">
+                    <label>Название игры</label>
+                    <input type="text" id="roomName" placeholder="Новогодняя вечеринка 2025">
+                </div>
+
+                <div class="input-group">
+                    <label>Максимальный бюджет (₽)</label>
+                    <input type="number" id="roomBudget" placeholder="1000">
+                </div>
+
+                <div class="input-group">
+                    <label>Дата обмена подарками</label>
+                    <input type="date" id="roomDate">
+                </div>
+
+                <div class="input-group">
+                    <label>Ваше имя</label>
+                    <input type="text" id="creatorName" placeholder="Иван">
+                </div>
+
+                <div class="input-group">
+                    <label>Ваши пожелания к подарку</label>
+                    <textarea id="creatorWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="createRoom()">
+                    Создать комнату
+                </button>
+                <button class="btn btn-secondary" onclick="showMainMenu()">
+                    Назад
+                </button>
+            </div>
+        </div>
+
+        <!-- Присоединение к комнате -->
+        <div id="joinRoomScreen" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Присоединиться</h2>
+                
+                <div class="input-group">
+                    <label>Код комнаты</label>
+                    <input type="text" id="joinCode" placeholder="ABCD1234" style="text-transform: uppercase;">
+                </div>
+
+                <div class="input-group">
+                    <label>Ваше имя</label>
+                    <input type="text" id="joinName" placeholder="Иван">
+                </div>
+
+                <div class="input-group">
+                    <label>Ваши пожелания к подарку</label>
+                    <textarea id="joinWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="joinRoom()">
+                    Присоединиться
+                </button>
+                <button class="btn btn-secondary" onclick="showMainMenu()">
+                    Назад
+                </button>
+            </div>
+        </div>
+
+        <!-- Экран комнаты -->
+        <div id="roomScreen" class="hidden">
+            <div class="card">
+                <h2 id="roomTitle" style="margin-bottom: 10px;"></h2>
+                <p id="roomInfo" style="color: #666; margin-bottom: 20px;"></p>
+
+                <div class="room-code">
+                    <h3>Код комнаты:</h3>
+                    <div class="code" id="displayCode"></div>
+                    <p style="margin-top: 10px; font-size: 0.9em;">Поделитесь этим кодом с друзьями</p>
+                </div>
+
+                <div class="participants">
+                    <h3 style="margin-bottom: 15px;">
+                        Участники <span id="participantCount" class="status-badge status-waiting">0</span>
+                    </h3>
+                    <div id="participantsList"></div>
+                </div>
+
+                <button class="btn btn-success" id="startGameBtn" onclick="startGame()" style="margin-top: 20px;">
+                    🎲 Начать игру
+                </button>
+                <button class="btn btn-secondary" onclick="leaveRoom()">
+                    Покинуть комнату
+                </button>
+            </div>
+        </div>
+
+        <!-- Экран назначения -->
+        <div id="assignmentScreen" class="hidden">
+            <div class="card">
+                <div class="assignment-card">
+                    <div class="gift-icon">🎁</div>
+                    <h2>Вы дарите подарок:</h2>
+                    <div class="assignment-name" id="assignmentName"></div>
+                    <p style="margin-top: 20px; font-size: 1.1em;">Бюджет: <strong id="assignmentBudget"></strong></p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <h3 style="margin-bottom: 10px;">💝 Пожелания:</h3>
+                    <p id="assignmentWish" style="color: #555; line-height: 1.6;"></p>
+                </div>
+
+                <div class="info-box">
+                    <h4>⚠️ Важно!</h4>
+                    <p>Сохраните это в тайне! Никто не должен знать, кто кому дарит подарок до момента обмена.</p>
+                </div>
+
+                <button class="btn btn-secondary" onclick="showMainMenu()">
+                    На главную
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.hide();
+
+        // Применяем тему Telegram
+        document.body.style.background = tg.themeParams.bg_color || document.body.style.background;
+
+        // Глобальные переменные
+        let currentRoomCode = null;
+        let currentUserId = null;
+
+        // API Base URL - ЗАМЕНИТЕ НА ВАШ СЕРВЕР
+        // Для локальной разработки: 'http://localhost:8000/api'
+        // Для продакшн: 'https://your-domain.com/api'
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000/api'
+            : 'https://your-api-url.com/api';
+        
+        const USE_DEMO_MODE = true; // Установите false для работы с реальным API
+
+        // Навигация между экранами
+        function showScreen(screenId) {
+            document.querySelectorAll('.container > div').forEach(el => {
+                if (el.classList.contains('header')) return;
+                el.classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showMainMenu() {
+            showScreen('mainMenu');
+            currentRoomCode = null;
+        }
+
+        function showCreateRoom() {
+            showScreen('createRoomScreen');
+            // Устанавливаем дату по умолчанию (через неделю)
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('roomDate').value = nextWeek.toISOString().split('T')[0];
+        }
+
+        function showJoinRoom() {
+            showScreen('joinRoomScreen');
+        }
+
+        // Создание комнаты
+        async function createRoom() {
+            const roomName = document.getElementById('roomName').value.trim();
+            const budget = document.getElementById('roomBudget').value;
+            const date = document.getElementById('roomDate').value;
+            const creatorName = document.getElementById('creatorName').value.trim();
+            const creatorWish = document.getElementById('creatorWish').value.trim();
+
+            if (!roomName || !budget || !date || !creatorName) {
+                tg.showAlert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
+
+            const roomData = {
+                name: roomName,
+                budget: parseInt(budget),
+                exchange_date: date,
+                creator: {
+                    name: creatorName,
+                    wish: creatorWish,
+                    telegram_id: tg.initDataUnsafe?.user?.id || Math.random().toString()
+                }
+            };
+
+            try {
+                if (USE_DEMO_MODE) {
+                    // DEMO режим - генерируем случайный код
+                    const code = generateRoomCode();
+                    currentRoomCode = code;
+                    currentUserId = roomData.creator.telegram_id;
+                    
+                    // Сохраняем в localStorage для демо
+                    saveRoomToStorage(code, roomData);
+                    
+                    displayRoom(code, roomData);
+                    showScreen('roomScreen');
+                    
+                    tg.showAlert('Комната создана! Поделитесь кодом с друзьями.');
+                } else {
+                    // Реальный API запрос
+                    const response = await fetch(`${API_URL}/rooms/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(roomData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Ошибка при создании комнаты');
+                    }
+
+                    const result = await response.json();
+                    currentRoomCode = result.code;
+                    currentUserId = roomData.creator.telegram_id;
+                    
+                    // Загружаем полную информацию о комнате
+                    await loadRoomFromAPI(result.code);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert('Ошибка при создании комнаты');
+            }
+        }
+
+        // Присоединение к комнате
+        async function joinRoom() {
+            const code = document.getElementById('joinCode').value.trim().toUpperCase();
+            const name = document.getElementById('joinName').value.trim();
+            const wish = document.getElementById('joinWish').value.trim();
+
+            if (!code || !name) {
+                tg.showAlert('Пожалуйста, заполните все поля');
+                return;
+            }
+
+            const userId = tg.initDataUnsafe?.user?.id || Math.random().toString();
+
+            try {
+                if (USE_DEMO_MODE) {
+                    // DEMO режим - загружаем из localStorage
+                    const room = loadRoomFromStorage(code);
+                    
+                    if (!room) {
+                        tg.showAlert('Комната не найдена');
+                        return;
+                    }
+                    
+                    // Добавляем участника
+                    if (!room.participants) room.participants = [];
+                    room.participants.push({
+                        name: name,
+                        wish: wish,
+                        telegram_id: userId
+                    });
+                    
+                    saveRoomToStorage(code, room);
+                    
+                    currentRoomCode = code;
+                    currentUserId = userId;
+                    
+                    displayRoom(code, room);
+                    showScreen('roomScreen');
+                    
+                    tg.showAlert('Вы успешно присоединились!');
+                } else {
+                    // Реальный API запрос
+                    const response = await fetch(`${API_URL}/rooms/join`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            code: code,
+                            participant: {
+                                name: name,
+                                wish: wish,
+                                telegram_id: userId
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Ошибка при присоединении');
+                    }
+
+                    currentRoomCode = code;
+                    currentUserId = userId;
+                    
+                    await loadRoomFromAPI(code);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert(error.message || 'Ошибка при присоединении к комнате');
+            }
+        }
+        
+        // Загрузка комнаты из API
+        async function loadRoomFromAPI(code) {
+            try {
+                const response = await fetch(`${API_URL}/rooms/${code}?telegram_id=${currentUserId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Комната не найдена');
+                }
+                
+                const room = await response.json();
+                displayRoom(code, room);
+                showScreen('roomScreen');
+                
+                // Если игра уже началась, загружаем назначение
+                if (room.started) {
+                    await loadAssignment(code);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert('Ошибка при загрузке комнаты');
+            }
+        }
+
+        // Отображение комнаты
+        function displayRoom(code, room) {
+            document.getElementById('roomTitle').textContent = room.name;
+            document.getElementById('roomInfo').textContent = 
+                `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
+            document.getElementById('displayCode').textContent = code;
+
+            const participants = room.participants || [room.creator];
+            document.getElementById('participantCount').textContent = participants.length;
+            
+            const participantsList = document.getElementById('participantsList');
+            participantsList.innerHTML = participants.map((p, i) => `
+                <div class="participant">
+                    <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${p.name}</div>
+                        <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Показываем кнопку старта только создателю
+            const startBtn = document.getElementById('startGameBtn');
+            if (currentUserId === room.creator.telegram_id) {
+                startBtn.classList.remove('hidden');
+                startBtn.disabled = participants.length < 3;
+                if (participants.length < 3) {
+                    startBtn.textContent = `🎲 Нужно минимум 3 участника (сейчас ${participants.length})`;
+                } else {
+                    startBtn.textContent = '🎲 Начать игру';
+                }
+            } else {
+                startBtn.classList.add('hidden');
+            }
+        }
+
+        // Начало игры
+        async function startGame() {
+            if (!currentRoomCode) return;
+
+            try {
+                if (USE_DEMO_MODE) {
+                    const room = loadRoomFromStorage(currentRoomCode);
+                    const participants = room.participants || [room.creator];
+
+                    if (participants.length < 3) {
+                        tg.showAlert('Нужно минимум 3 участника для игры');
+                        return;
+                    }
+
+                    // Алгоритм распределения Secret Santa
+                    const shuffled = [...participants];
+                    
+                    // Перемешиваем массив
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+
+                    // Создаем пары (каждый дарит следующему по кругу)
+                    const assignments = {};
+                    for (let i = 0; i < shuffled.length; i++) {
+                        const giver = shuffled[i];
+                        const receiver = shuffled[(i + 1) % shuffled.length];
+                        assignments[giver.telegram_id] = receiver;
+                    }
+
+                    room.assignments = assignments;
+                    room.started = true;
+                    saveRoomToStorage(currentRoomCode, room);
+
+                    // Показываем назначение текущему пользователю
+                    showAssignment(assignments[currentUserId], room.budget);
+                } else {
+                    // Реальный API запрос
+                    const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
+                        method: 'POST'
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Ошибка при запуске игры');
+                    }
+
+                    await loadAssignment(currentRoomCode);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert(error.message || 'Ошибка при запуске игры');
+            }
+        }
+
+        // Загрузка назначения из API
+        async function loadAssignment(code) {
+            try {
+                const response = await fetch(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Назначение не найдено');
+                }
+                
+                const assignment = await response.json();
+                showAssignment({
+                    name: assignment.receiver_name,
+                    wish: assignment.receiver_wish
+                }, assignment.budget);
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert('Ошибка при загрузке назначения');
+            }
+        }
+
+        // Отображение назначения
+        function showAssignment(receiver, budget) {
+            document.getElementById('assignmentName').textContent = receiver.name;
+            document.getElementById('assignmentBudget').textContent = `${budget}₽`;
+            document.getElementById('assignmentWish').textContent = 
+                receiver.wish || 'Участник не указал пожелания';
+            
+            showScreen('assignmentScreen');
+        }
+
+        // Покинуть комнату
+        function leaveRoom() {
+            tg.showConfirm('Вы уверены, что хотите покинуть комнату?', (confirmed) => {
+                if (confirmed) {
+                    showMainMenu();
+                }
+            });
+        }
+
+        // Вспомогательные функции
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function saveRoomToStorage(code, data) {
+            localStorage.setItem(`room_${code}`, JSON.stringify(data));
+        }
+
+        function loadRoomFromStorage(code) {
+            const data = localStorage.getItem(`room_${code}`);
+            return data ? JSON.parse(data) : null;
+        }
+
+        // Проверяем, есть ли активная комната при загрузке
+        window.addEventListener('load', () => {
+            // Можно добавить логику восстановления сессии
+        });
+    </script>
+</body>
+</html>
