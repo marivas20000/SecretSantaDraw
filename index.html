@@ -92,6 +92,11 @@
             color: white;
         }
 
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
         .input-group {
             margin-bottom: 20px;
         }
@@ -142,6 +147,23 @@
             font-weight: bold;
             letter-spacing: 4px;
             font-family: monospace;
+            margin: 10px 0;
+        }
+
+        .copy-button {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .copy-button:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         .participants {
@@ -182,6 +204,21 @@
         .participant-wish {
             font-size: 0.9em;
             color: #666;
+        }
+
+        .participant-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
         }
 
         .status-badge {
@@ -228,6 +265,42 @@
             font-size: 4em;
             margin: 20px 0;
             animation: bounce 2s infinite;
+        }
+
+        .room-list-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .room-list-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .room-list-item h4 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .room-list-item p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
         }
 
         .hidden {
@@ -294,6 +367,16 @@
             color: #555;
             line-height: 1.6;
         }
+
+        .share-link {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -304,12 +387,15 @@
         </div>
 
         <!-- Главное меню -->
-        <div id="mainMenu" class="card">
+        <div id="mainMenu" class="card hidden">
             <button class="btn btn-primary" onclick="showCreateRoom()">
                 🎁 Создать комнату
             </button>
             <button class="btn btn-secondary" onclick="showJoinRoom()">
                 🚪 Присоединиться к комнате
+            </button>
+            <button class="btn btn-secondary" onclick="showMyRooms()">
+                📋 Мои комнаты
             </button>
             
             <div class="info-box">
@@ -319,6 +405,17 @@
                 3. Дождитесь всех участников<br>
                 4. Получите своего получателя подарка<br>
                 5. Подготовьте подарок и обменяйтесь в назначенный день!</p>
+            </div>
+        </div>
+
+        <!-- Список комнат пользователя -->
+        <div id="myRoomsScreen" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Мои комнаты</h2>
+                <div id="roomsList"></div>
+                <button class="btn btn-secondary" onclick="showMainMenu()">
+                    Назад
+                </button>
             </div>
         </div>
 
@@ -399,7 +496,12 @@
                 <div class="room-code">
                     <h3>Код комнаты:</h3>
                     <div class="code" id="displayCode"></div>
-                    <p style="margin-top: 10px; font-size: 0.9em;">Поделитесь этим кодом с друзьями</p>
+                    <button class="copy-button" onclick="copyRoomCode()">
+                        📋 Копировать код
+                    </button>
+                    <button class="copy-button" onclick="shareRoom()">
+                        🔗 Поделиться ссылкой
+                    </button>
                 </div>
 
                 <div class="participants">
@@ -412,8 +514,11 @@
                 <button class="btn btn-success" id="startGameBtn" onclick="startGame()" style="margin-top: 20px;">
                     🎲 Начать игру
                 </button>
-                <button class="btn btn-secondary" onclick="leaveRoom()">
+                <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">
                     Покинуть комнату
+                </button>
+                <button class="btn btn-secondary" onclick="showMainMenu()">
+                    На главную
                 </button>
             </div>
         </div>
@@ -429,7 +534,7 @@
                 </div>
 
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0;">
-                    <h3 style="margin-bottom: 10px;">💝 Пожелания:</h3>
+                    <h3 style="margin-bottom: 10px;">💭 Пожелания:</h3>
                     <p id="assignmentWish" style="color: #555; line-height: 1.6;"></p>
                 </div>
 
@@ -457,13 +562,41 @@
         // Глобальные переменные
         let currentRoomCode = null;
         let currentUserId = null;
+        let currentUserName = '';
 
         // API Base URL
         const API_URL = window.location.hostname === 'localhost'
             ? 'http://127.0.0.1:8002/api'
             : 'https://secretsantadrawprivate.onrender.com/api';
 
-        const USE_DEMO_MODE = false; // Включен реальный API режим
+        const BOT_USERNAME = 'your_bot_username'; // Замените на имя вашего бота
+
+        // Инициализация
+        window.addEventListener('load', async () => {
+            // Получаем данные пользователя из Telegram
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                currentUserId = user.id.toString();
+                currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                
+                // Автозаполнение имени
+                document.getElementById('creatorName').value = currentUserName;
+                document.getElementById('joinName').value = currentUserName;
+            } else {
+                currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Проверяем start_param для deep linking
+            const startParam = tg.initDataUnsafe?.start_param;
+            if (startParam && startParam.startsWith('join_')) {
+                const roomCode = startParam.replace('join_', '');
+                document.getElementById('joinCode').value = roomCode;
+                showJoinRoom();
+            } else {
+                // Загружаем комнаты пользователя
+                await loadUserRooms();
+            }
+        });
 
         // Навигация между экранами
         function showScreen(screenId) {
@@ -474,7 +607,8 @@
             document.getElementById(screenId).classList.remove('hidden');
         }
 
-        function showMainMenu() {
+        async function showMainMenu() {
+            await loadUserRooms();
             showScreen('mainMenu');
             currentRoomCode = null;
         }
@@ -491,6 +625,73 @@
             showScreen('joinRoomScreen');
         }
 
+        async function showMyRooms() {
+            showScreen('myRoomsScreen');
+            await displayUserRooms();
+        }
+
+        // Загрузка комнат пользователя
+        async function loadUserRooms() {
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнат');
+                
+                const data = await response.json();
+                
+                // Если есть активные комнаты, показываем главное меню
+                if (data.rooms && data.rooms.length > 0) {
+                    showScreen('mainMenu');
+                } else {
+                    showScreen('mainMenu');
+                }
+            } catch (error) {
+                console.error('Error loading rooms:', error);
+                showScreen('mainMenu');
+            }
+        }
+
+        // Отображение списка комнат
+        async function displayUserRooms() {
+            const roomsList = document.getElementById('roomsList');
+            roomsList.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнат');
+                
+                const data = await response.json();
+                
+                if (!data.rooms || data.rooms.length === 0) {
+                    roomsList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎄</div>
+                            <h3>У вас пока нет комнат</h3>
+                            <p>Создайте новую или присоединитесь к существующей!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                roomsList.innerHTML = data.rooms.map(room => `
+                    <div class="room-list-item" onclick="openRoom('${room.code}')">
+                        <h4>${room.name}</h4>
+                        <p>👥 Участников: ${room.participant_count} • 💰 Бюджет: ${room.budget}₽</p>
+                        <p>📅 ${formatDate(room.exchange_date)} • ${room.started ? '✅ Началась' : '⏳ Ожидание'}</p>
+                        ${room.is_creator ? '<p style="color: #667eea; font-weight: 600;">👑 Вы создатель</p>' : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                roomsList.innerHTML = '<div class="error">Ошибка загрузки комнат</div>';
+            }
+        }
+
+        // Открытие комнаты из списка
+        async function openRoom(code) {
+            currentRoomCode = code;
+            await loadRoomFromAPI(code);
+        }
+
         // Создание комнаты
         async function createRoom() {
             const roomName = document.getElementById('roomName').value.trim();
@@ -500,7 +701,7 @@
             const creatorWish = document.getElementById('creatorWish').value.trim();
 
             if (!roomName || !budget || !date || !creatorName) {
-                alert('Пожалуйста, заполните все обязательные поля');
+                tg.showAlert('Пожалуйста, заполните все обязательные поля');
                 return;
             }
 
@@ -511,55 +712,32 @@
                 creator: {
                     name: creatorName,
                     wish: creatorWish,
-                    telegram_id: tg.initDataUnsafe?.user?.id || Math.random().toString()
+                    telegram_id: currentUserId
                 }
             };
 
             try {
-                if (USE_DEMO_MODE) {
-                    // DEMO режим - генерируем случайный код
-                    const code = generateRoomCode();
-                    currentRoomCode = code;
-                    currentUserId = roomData.creator.telegram_id;
-                    
-                    // Сохраняем в localStorage для демо
-                    saveRoomToStorage(code, roomData);
-                    
-                    displayRoom(code, roomData);
-                    showScreen('roomScreen');
-                    
-                    alert('Комната создана! Поделитесь кодом с друзьями.');
-                } else {
-                    // Реальный API запрос
-                    console.log('Отправка данных:', roomData);
-                    const response = await fetch(`${API_URL}/rooms/create`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(roomData)
-                    });
+                const response = await fetch(`${API_URL}/rooms/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(roomData)
+                });
 
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('Ошибка ответа:', response.status, errorText);
-                        throw new Error(`Ошибка при создании комнаты: ${response.status} ${errorText}`);
-                    }
-
-                    const result = await response.json();
-                    console.log('Получен результат:', result);
-                    if (!result || !result.code) {
-                        throw new Error('Сервер вернул некорректный ответ: отсутствует код комнаты');
-                    }
-                    currentRoomCode = result.code;
-                    currentUserId = roomData.creator.telegram_id;
-
-                    // Загружаем полную информацию о комнате
-                    await loadRoomFromAPI(result.code);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Ошибка при создании комнаты: ${response.status}`);
                 }
+
+                const result = await response.json();
+                currentRoomCode = result.code;
+
+                await loadRoomFromAPI(result.code);
+                tg.showAlert('Комната создана! Поделитесь кодом с друзьями.');
             } catch (error) {
                 console.error('Error:', error);
-                alert('Ошибка при создании комнаты: ' + error.message);
+                tg.showAlert('Ошибка при создании комнаты: ' + error.message);
             }
         }
 
@@ -570,72 +748,40 @@
             const wish = document.getElementById('joinWish').value.trim();
 
             if (!code || !name) {
-                alert('Пожалуйста, заполните все поля');
+                tg.showAlert('Пожалуйста, заполните все поля');
                 return;
             }
 
-            const userId = tg.initDataUnsafe?.user?.id || Math.random().toString();
-
             try {
-                if (USE_DEMO_MODE) {
-                    // DEMO режим - загружаем из localStorage
-                    const room = loadRoomFromStorage(code);
-                    
-                    if (!room) {
-                        alert('Комната не найдена');
-                        return;
-                    }
-                    
-                    // Добавляем участника
-                    if (!room.participants) room.participants = [];
-                    room.participants.push({
-                        name: name,
-                        wish: wish,
-                        telegram_id: userId
-                    });
-                    
-                    saveRoomToStorage(code, room);
-                    
-                    currentRoomCode = code;
-                    currentUserId = userId;
-                    
-                    displayRoom(code, room);
-                    showScreen('roomScreen');
-                    
-                    alert('Вы успешно присоединились!');
-                } else {
-                    // Реальный API запрос
-                    const response = await fetch(`${API_URL}/rooms/join`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            code: code,
-                            participant: {
-                                name: name,
-                                wish: wish,
-                                telegram_id: userId
-                            }
-                        })
-                    });
+                const response = await fetch(`${API_URL}/rooms/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        participant: {
+                            name: name,
+                            wish: wish,
+                            telegram_id: currentUserId
+                        }
+                    })
+                });
 
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.detail || 'Ошибка при присоединении');
-                    }
-
-                    currentRoomCode = code;
-                    currentUserId = userId;
-                    
-                    await loadRoomFromAPI(code);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка при присоединении');
                 }
+
+                currentRoomCode = code;
+                await loadRoomFromAPI(code);
+                tg.showAlert('Вы успешно присоединились!');
             } catch (error) {
                 console.error('Error:', error);
-                alert(error.message || 'Ошибка при присоединении к комнате');
+                tg.showAlert(error.message || 'Ошибка при присоединении к комнате');
             }
         }
-        
+
         // Загрузка комнаты из API
         async function loadRoomFromAPI(code) {
             try {
@@ -646,7 +792,6 @@
                 }
                 
                 const room = await response.json();
-                console.log('Загруженная комната:', room);
                 displayRoom(code, room);
                 showScreen('roomScreen');
                 
@@ -656,7 +801,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Ошибка при загрузке комнаты: ' + error.message);
+                tg.showAlert('Ошибка при загрузке комнаты: ' + error.message);
             }
         }
 
@@ -667,7 +812,6 @@
                 `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
             document.getElementById('displayCode').textContent = code;
 
-            // Для API ответа participants может быть массивом или undefined
             const participants = room.participants || [];
             const participantCount = room.participant_count || participants.length;
             
@@ -676,13 +820,20 @@
             const participantsList = document.getElementById('participantsList');
             
             if (participants.length > 0) {
-                participantsList.innerHTML = participants.map((p, i) => `
+                participantsList.innerHTML = participants.map(p => `
                     <div class="participant">
                         <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
                         <div class="participant-info">
                             <div class="participant-name">${p.name}</div>
                             <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
                         </div>
+                        ${room.is_creator && p.telegram_id !== currentUserId && !room.started ? `
+                            <div class="participant-actions">
+                                <button class="remove-btn" onclick="removeParticipant('${p.telegram_id}')">
+                                    Удалить
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
             } else {
@@ -697,21 +848,26 @@
 
             // Показываем кнопку старта только создателю
             const startBtn = document.getElementById('startGameBtn');
+            const leaveBtn = document.getElementById('leaveRoomBtn');
             
-            // Проверяем is_creator из API или сравниваем telegram_id
-            const isCreator = room.is_creator === true || 
-                             (room.creator && currentUserId === room.creator.telegram_id);
-            
-            if (isCreator) {
+            if (room.is_creator) {
                 startBtn.classList.remove('hidden');
-                startBtn.disabled = participantCount < 3;
-                if (participantCount < 3) {
+                startBtn.disabled = participantCount < 3 || room.started;
+                if (room.started) {
+                    startBtn.textContent = '✅ Игра началась';
+                } else if (participantCount < 3) {
                     startBtn.textContent = `🎲 Нужно минимум 3 участника (сейчас ${participantCount})`;
                 } else {
                     startBtn.textContent = '🎲 Начать игру';
                 }
+                leaveBtn.classList.add('hidden');
             } else {
                 startBtn.classList.add('hidden');
+                if (!room.started) {
+                    leaveBtn.classList.remove('hidden');
+                } else {
+                    leaveBtn.classList.add('hidden');
+                }
             }
         }
 
@@ -719,55 +875,25 @@
         async function startGame() {
             if (!currentRoomCode) return;
 
+            if (!confirm('Начать игру? После этого нельзя будет добавить новых участников.')) {
+                return;
+            }
+
             try {
-                if (USE_DEMO_MODE) {
-                    const room = loadRoomFromStorage(currentRoomCode);
-                    const participants = room.participants || [room.creator];
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
+                    method: 'POST'
+                });
 
-                    if (participants.length < 3) {
-                        alert('Нужно минимум 3 участника для игры');
-                        return;
-                    }
-
-                    // Алгоритм распределения Secret Santa
-                    const shuffled = [...participants];
-                    
-                    // Перемешиваем массив
-                    for (let i = shuffled.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                    }
-
-                    // Создаем пары (каждый дарит следующему по кругу)
-                    const assignments = {};
-                    for (let i = 0; i < shuffled.length; i++) {
-                        const giver = shuffled[i];
-                        const receiver = shuffled[(i + 1) % shuffled.length];
-                        assignments[giver.telegram_id] = receiver;
-                    }
-
-                    room.assignments = assignments;
-                    room.started = true;
-                    saveRoomToStorage(currentRoomCode, room);
-
-                    // Показываем назначение текущему пользователю
-                    showAssignment(assignments[currentUserId], room.budget);
-                } else {
-                    // Реальный API запрос
-                    const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
-                        method: 'POST'
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.detail || 'Ошибка при запуске игры');
-                    }
-
-                    await loadAssignment(currentRoomCode);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка при запуске игры');
                 }
+
+                await loadAssignment(currentRoomCode);
+                tg.showAlert('Игра началась! Все участники получили уведомления.');
             } catch (error) {
                 console.error('Error:', error);
-                alert(error.message || 'Ошибка при запуске игры');
+                tg.showAlert(error.message || 'Ошибка при запуске игры');
             }
         }
 
@@ -787,7 +913,7 @@
                 }, assignment.budget);
             } catch (error) {
                 console.error('Error:', error);
-                alert('Ошибка при загрузке назначения: ' + error.message);
+                tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
             }
         }
 
@@ -802,40 +928,113 @@
         }
 
         // Покинуть комнату
-        function leaveRoom() {
-            if (confirm('Вы уверены, что хотите покинуть комнату?')) {
+        async function leaveRoom() {
+            if (!currentRoomCode) return;
+
+            if (!confirm('Вы уверены, что хотите покинуть комнату?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/leave?telegram_id=${currentUserId}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка при выходе из комнаты');
+                }
+
+                tg.showAlert('Вы покинули комнату');
                 showMainMenu();
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert(error.message || 'Ошибка при выходе из комнаты');
             }
         }
 
-        // Вспомогательные функции
-        function generateRoomCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+        // Удалить участника (только для создателя)
+        async function removeParticipant(participantId) {
+            if (!currentRoomCode) return;
+
+            if (!confirm('Удалить этого участника из комнаты?')) {
+                return;
             }
-            return code;
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/rooms/${currentRoomCode}/participant/${participantId}?admin_telegram_id=${currentUserId}`,
+                    { method: 'DELETE' }
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка при удалении участника');
+                }
+
+                tg.showAlert('Участник удален');
+                await loadRoomFromAPI(currentRoomCode);
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert(error.message || 'Ошибка при удалении участника');
+            }
         }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        // Копирование кода комнаты
+        function copyRoomCode() {
+            const code = document.getElementById('displayCode').textContent;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    tg.showAlert('Код скопирован: ' + code);
+                }).catch(() => {
+                    fallbackCopy(code);
+                });
+            } else {
+                fallbackCopy(code);
+            }
         }
 
-        function saveRoomToStorage(code, data) {
-            localStorage.setItem(`room_${code}`, JSON.stringify(data));
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                tg.showAlert('Код скопирован: ' + text);
+            } catch (err) {
+                tg.showAlert('Код комнаты: ' + text);
+            }
+            document.body.removeChild(textarea);
         }
 
-        function loadRoomFromStorage(code) {
-            const data = localStorage.getItem(`room_${code}`);
-            return data ? JSON.parse(data) : null;
+        // Поделиться комнатой
+        function shareRoom() {
+            if (!currentRoomCode) return;
+            
+            // Создаем deep link
+            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
+            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}\nИли просто перейди по ссылке: ${shareUrl}`;
+            
+            // Используем Telegram Share
+            if (tg.openTelegramLink) {
+                const encodedText = encodeURIComponent(shareText);
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
+            } else {
+                // Fallback: копируем текст
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
+                    });
+                } else {
+                    tg.showAlert(`Отправьте друзьям:\n${shareText}`);
+                }
+            }
         }
 
-        // Проверяем, есть ли активная комната при загрузке
-        window.addEventListener('load', () => {
-            // Можно добавить логику восстановления сессии
-        });
     </script>
 </body>
 </html>
