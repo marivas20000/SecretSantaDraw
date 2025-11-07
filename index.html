@@ -458,9 +458,7 @@
         let currentRoomCode = null;
         let currentUserId = null;
 
-        // API Base URL - ЗАМЕНИТЕ НА ВАШ СЕРВЕР
-        // Для локальной разработки: 'http://localhost:8000/api'
-        // Для продакшн: замените на ваш реальный URL
+        // API Base URL
         const API_URL = window.location.hostname === 'localhost'
             ? 'http://127.0.0.1:8002/api'
             : 'https://secretsantadrawprivate.onrender.com/api';
@@ -572,7 +570,7 @@
             const wish = document.getElementById('joinWish').value.trim();
 
             if (!code || !name) {
-                tg.showAlert('Пожалуйста, заполните все поля');
+                alert('Пожалуйста, заполните все поля');
                 return;
             }
 
@@ -584,7 +582,7 @@
                     const room = loadRoomFromStorage(code);
                     
                     if (!room) {
-                        tg.showAlert('Комната не найдена');
+                        alert('Комната не найдена');
                         return;
                     }
                     
@@ -604,7 +602,7 @@
                     displayRoom(code, room);
                     showScreen('roomScreen');
                     
-                    tg.showAlert('Вы успешно присоединились!');
+                    alert('Вы успешно присоединились!');
                 } else {
                     // Реальный API запрос
                     const response = await fetch(`${API_URL}/rooms/join`, {
@@ -634,7 +632,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                tg.showAlert(error.message || 'Ошибка при присоединении к комнате');
+                alert(error.message || 'Ошибка при присоединении к комнате');
             }
         }
         
@@ -648,6 +646,7 @@
                 }
                 
                 const room = await response.json();
+                console.log('Загруженная комната:', room);
                 displayRoom(code, room);
                 showScreen('roomScreen');
                 
@@ -657,7 +656,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                tg.showAlert('Ошибка при загрузке комнаты');
+                alert('Ошибка при загрузке комнаты: ' + error.message);
             }
         }
 
@@ -668,27 +667,46 @@
                 `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
             document.getElementById('displayCode').textContent = code;
 
-            const participants = room.participants || [room.creator];
-            document.getElementById('participantCount').textContent = participants.length;
+            // Для API ответа participants может быть массивом или undefined
+            const participants = room.participants || [];
+            const participantCount = room.participant_count || participants.length;
+            
+            document.getElementById('participantCount').textContent = participantCount;
             
             const participantsList = document.getElementById('participantsList');
-            participantsList.innerHTML = participants.map((p, i) => `
-                <div class="participant">
-                    <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
-                    <div class="participant-info">
-                        <div class="participant-name">${p.name}</div>
-                        <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
+            
+            if (participants.length > 0) {
+                participantsList.innerHTML = participants.map((p, i) => `
+                    <div class="participant">
+                        <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">${p.name}</div>
+                            <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                participantsList.innerHTML = `
+                    <div class="participant">
+                        <div class="participant-info">
+                            <div class="participant-name">Загрузка участников...</div>
+                        </div>
+                    </div>
+                `;
+            }
 
             // Показываем кнопку старта только создателю
             const startBtn = document.getElementById('startGameBtn');
-            if (currentUserId === room.creator.telegram_id) {
+            
+            // Проверяем is_creator из API или сравниваем telegram_id
+            const isCreator = room.is_creator === true || 
+                             (room.creator && currentUserId === room.creator.telegram_id);
+            
+            if (isCreator) {
                 startBtn.classList.remove('hidden');
-                startBtn.disabled = participants.length < 3;
-                if (participants.length < 3) {
-                    startBtn.textContent = `🎲 Нужно минимум 3 участника (сейчас ${participants.length})`;
+                startBtn.disabled = participantCount < 3;
+                if (participantCount < 3) {
+                    startBtn.textContent = `🎲 Нужно минимум 3 участника (сейчас ${participantCount})`;
                 } else {
                     startBtn.textContent = '🎲 Начать игру';
                 }
@@ -707,7 +725,7 @@
                     const participants = room.participants || [room.creator];
 
                     if (participants.length < 3) {
-                        tg.showAlert('Нужно минимум 3 участника для игры');
+                        alert('Нужно минимум 3 участника для игры');
                         return;
                     }
 
@@ -749,7 +767,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                tg.showAlert(error.message || 'Ошибка при запуске игры');
+                alert(error.message || 'Ошибка при запуске игры');
             }
         }
 
@@ -769,7 +787,7 @@
                 }, assignment.budget);
             } catch (error) {
                 console.error('Error:', error);
-                tg.showAlert('Ошибка при загрузке назначения');
+                alert('Ошибка при загрузке назначения: ' + error.message);
             }
         }
 
@@ -785,11 +803,9 @@
 
         // Покинуть комнату
         function leaveRoom() {
-            tg.showConfirm('Вы уверены, что хотите покинуть комнату?', (confirmed) => {
-                if (confirmed) {
-                    showMainMenu();
-                }
-            });
+            if (confirm('Вы уверены, что хотите покинуть комнату?')) {
+                showMainMenu();
+            }
         }
 
         // Вспомогательные функции
