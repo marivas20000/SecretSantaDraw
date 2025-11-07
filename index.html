@@ -601,9 +601,8 @@
             if (startParam && startParam.startsWith('join_')) {
                 const roomCode = startParam.replace('join_', '');
                 document.getElementById('joinCode').value = roomCode;
-                showJoinRoom();
+                showJoinRoom(); // ← Эта строка уже есть, все правильно!
             } else {
-                // Загружаем комнаты пользователя
                 await loadUserRooms();
             }
         });
@@ -1025,28 +1024,21 @@
         function shareRoom() {
             if (!currentRoomCode) return;
             
-            // Создаем deep link
-            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
-            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}\nИли просто перейди по ссылке: ${shareUrl}`;
+            // Прямая ссылка на Mini App с параметром
+            const shareUrl = `https://t.me/${BOT_USERNAME}/app?startapp=join_${currentRoomCode}`;
+            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
             
-            // Используем Telegram Share
             if (tg.openTelegramLink) {
-                const encodedText = encodeURIComponent(shareText);
-                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
             } else {
-                // Fallback: копируем текст
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(shareText).then(() => {
-                        tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
-                    });
-                } else {
-                    tg.showAlert(`Отправьте друзьям:\n${shareText}`);
-                }
+                // Fallback
+                navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                    tg.showAlert('Ссылка скопирована!');
+                });
             }
         }
 
     </script>
 </body>
 </html>
-
 
