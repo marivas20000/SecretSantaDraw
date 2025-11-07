@@ -1025,20 +1025,28 @@
 
         // Поделиться комнатой
         function shareRoom() {
-        if (!currentRoomCode) return;
-        
-        // Правильная ссылка для шаринга Mini App
-        const shareUrl = `https://t.me/${BOT_USERNAME}?startattach=${currentRoomCode}`;
-        const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
-        
-        if (tg.openTelegramLink) {
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
-        } else {
-            navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
-                tg.showAlert('Ссылка скопирована!');
-            });
+            if (!currentRoomCode) return;
+            
+            // Создаем deep link
+            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
+            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
+            
+            // Используем Telegram Share (ссылка будет одна)
+            if (tg.openTelegramLink) {
+                const encodedText = encodeURIComponent(shareText);
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
+            } else {
+                // Fallback: копируем текст
+                const fullText = `${shareText}\n\n${shareUrl}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(fullText).then(() => {
+                        tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
+                    });
+                } else {
+                    tg.showAlert(`Отправьте друзьям:\n${fullText}`);
+                }
+            }
         }
-    }
 
     </script>
 </body>
