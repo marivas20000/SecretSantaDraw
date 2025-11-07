@@ -502,7 +502,7 @@
             const creatorWish = document.getElementById('creatorWish').value.trim();
 
             if (!roomName || !budget || !date || !creatorName) {
-                tg.showAlert('Пожалуйста, заполните все обязательные поля');
+                alert('Пожалуйста, заполните все обязательные поля');
                 return;
             }
 
@@ -530,9 +530,10 @@
                     displayRoom(code, roomData);
                     showScreen('roomScreen');
                     
-                    tg.showAlert('Комната создана! Поделитесь кодом с друзьями.');
+                    alert('Комната создана! Поделитесь кодом с друзьями.');
                 } else {
                     // Реальный API запрос
+                    console.log('Отправка данных:', roomData);
                     const response = await fetch(`${API_URL}/rooms/create`, {
                         method: 'POST',
                         headers: {
@@ -542,19 +543,22 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error('Ошибка при создании комнаты');
+                        const errorText = await response.text();
+                        console.error('Ошибка ответа:', response.status, errorText);
+                        throw new Error(`Ошибка при создании комнаты: ${response.status} ${errorText}`);
                     }
 
                     const result = await response.json();
+                    console.log('Получен результат:', result);
                     currentRoomCode = result.code;
                     currentUserId = roomData.creator.telegram_id;
-                    
+
                     // Загружаем полную информацию о комнате
                     await loadRoomFromAPI(result.code);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                tg.showAlert('Ошибка при создании комнаты');
+                alert('Ошибка при создании комнаты: ' + error.message);
             }
         }
 
