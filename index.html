@@ -550,6 +550,9 @@
 
                     const result = await response.json();
                     console.log('Получен результат:', result);
+                    if (!result || !result.code) {
+                        throw new Error('Сервер вернул некорректный ответ: отсутствует код комнаты');
+                    }
                     currentRoomCode = result.code;
                     currentUserId = roomData.creator.telegram_id;
 
