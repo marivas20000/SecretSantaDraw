@@ -596,12 +596,15 @@
                 currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
             }
 
-            // Проверяем start_param для deep linking
-            const startParam = tg.initDataUnsafe?.start_param;
-            if (startParam && startParam.startsWith('join_')) {
-                const roomCode = startParam.replace('join_', '');
+            // Проверяем start_param ИЛИ tgWebAppStartParam
+            const startParam = tg.initDataUnsafe?.start_param || 
+                            new URLSearchParams(window.location.hash.slice(1)).get('tgWebAppStartParam');
+
+            if (startParam) {
+                // Удаляем префикс join_ если есть
+                const roomCode = startParam.replace('join_', '').toUpperCase();
                 document.getElementById('joinCode').value = roomCode;
-                showJoinRoom(); // ← Эта строка уже есть, все правильно!
+                showJoinRoom();
             } else {
                 await loadUserRooms();
             }
@@ -1022,24 +1025,22 @@
 
         // Поделиться комнатой
         function shareRoom() {
-            if (!currentRoomCode) return;
-            
-            // Прямая ссылка на Mini App с параметром
-            const shareUrl = `https://t.me/${BOT_USERNAME}/app?startapp=join_${currentRoomCode}`;
-            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
-            
-            if (tg.openTelegramLink) {
-                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
-            } else {
-                // Fallback
-                navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
-                    tg.showAlert('Ссылка скопирована!');
-                });
-            }
+        if (!currentRoomCode) return;
+        
+        // Правильная ссылка для шаринга Mini App
+        const shareUrl = `https://t.me/${BOT_USERNAME}?startattach=${currentRoomCode}`;
+        const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
+        
+        if (tg.openTelegramLink) {
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+        } else {
+            navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                tg.showAlert('Ссылка скопирована!');
+            });
         }
+    }
 
     </script>
 </body>
 </html>
-
 
