@@ -12,84 +12,458 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* Темная тема (по умолчанию) */
+            --bg-primary: linear-gradient(180deg, #1a5f4e 0%, #0d3d2f 100%);
+            --bg-card: rgba(255, 255, 255, 0.1);
+            --bg-card-hover: rgba(255, 255, 255, 0.15);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.5);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.08);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --snowflake-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body.light-theme {
+            --bg-primary: linear-gradient(180deg, #e8f5f1 0%, #d4e9e2 100%);
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-card-hover: rgba(255, 255, 255, 1);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
+            --text-tertiary: #888888;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.95);
+            --input-border: rgba(0, 0, 0, 0.1);
+            --snowflake-color: rgba(26, 95, 78, 0.15);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Лоадер */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loader-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 14px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        /* Декоративные элементы фона */
+        .bg-decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .snowflake {
+            position: absolute;
+            color: var(--snowflake-color);
+            font-size: 24px;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .container {
-            max-width: 500px;
+            position: relative;
+            z-index: 1;
+            max-width: 480px;
             margin: 0 auto;
+            padding: 24px 20px 100px;
         }
 
+        /* Переключатель темы */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            background: var(--bg-card-hover);
+        }
+
+        /* Кнопка назад */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+
+        .back-button:hover {
+            transform: translateX(-4px);
+            background: var(--bg-card-hover);
+        }
+
+        /* Хедер */
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            animation: fadeIn 0.6s ease-in;
+            margin-bottom: 32px;
+            animation: fadeSlideDown 0.6s ease-out;
+        }
+
+        .header-icon {
+            font-size: 64px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .header h1 {
-            color: white;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1em;
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
         }
 
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
+        /* Карточки действий */
+        .action-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeSlideUp 0.6s ease-out backwards;
+        }
+
+        .action-card:nth-child(2) { animation-delay: 0.1s; }
+        .action-card:nth-child(3) { animation-delay: 0.2s; }
+
+        .action-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            background: var(--bg-card-hover);
+            box-shadow: 0 20px 40px var(--shadow-color);
+        }
+
+        .action-card:active {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .card-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .action-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .card-icon-create {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+        }
+
+        .card-icon-join {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+        }
+
+        .card-icon-my {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 8px 16px rgba(240, 147, 251, 0.3);
+        }
+
+        .card-text {
+            flex: 1;
+        }
+
+        .card-text h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .card-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .card-arrow {
+            font-size: 20px;
+            color: var(--text-tertiary);
+            transition: transform 0.3s ease;
+        }
+
+        .action-card:hover .card-arrow {
+            transform: translateX(4px);
+        }
+
+        /* Информационная карточка */
+        .info-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
+        }
+
+        .info-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card ul {
+            list-style: none;
+        }
+
+        .info-card li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .info-card li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4facfe;
+            font-weight: 700;
+        }
+
+        /* Формы ввода */
+        .input-group {
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: slideUp 0.6s ease-out;
+            animation: fadeSlideUp 0.6s ease-out backwards;
         }
 
-        .btn {
+        .input-group:nth-child(2) { animation-delay: 0.1s; }
+        .input-group:nth-child(3) { animation-delay: 0.2s; }
+        .input-group:nth-child(4) { animation-delay: 0.3s; }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .input-group input,
+        .input-group textarea {
             width: 100%;
             padding: 16px;
+            background: var(--input-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--input-border);
+            border-radius: 16px;
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input::placeholder,
+        .input-group textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: var(--input-bg);
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.1);
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Кнопки */
+        .btn {
+            width: 100%;
+            padding: 18px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
+            border-radius: 16px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            animation: fadeSlideUp 0.6s ease-out backwards;
+            position: relative;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
             color: white;
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4);
         }
 
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
         }
 
-        .btn-secondary:hover {
-            background: #e0e0e0;
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
+            box-shadow: 0 8px 16px rgba(17, 153, 142, 0.3);
         }
 
         .btn-danger {
@@ -102,99 +476,97 @@
             color: white;
         }
 
-        .input-group {
-            margin-bottom: 20px;
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
         }
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .input-group input, .input-group textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: border 0.3s ease;
-            font-family: inherit;
-        }
-
-        .input-group input:focus, .input-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .input-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
+        /* Код комнаты */
         .room-code {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 32px 24px;
+            border-radius: 24px;
             text-align: center;
-            margin: 20px 0;
+            margin: 24px 0;
+            box-shadow: 0 12px 24px rgba(240, 147, 251, 0.3);
+            animation: fadeSlideUp 0.6s ease-out 0.2s backwards;
         }
 
         .room-code h3 {
-            margin-bottom: 10px;
-            font-size: 1.2em;
+            margin-bottom: 12px;
+            font-size: 16px;
+            opacity: 0.9;
         }
 
         .room-code .code {
-            font-size: 2em;
-            font-weight: bold;
-            letter-spacing: 4px;
-            font-family: monospace;
-            margin: 10px 0;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 16px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .copy-button {
             background: rgba(255,255,255,0.2);
             border: 2px solid white;
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            margin-top: 10px;
+            margin: 8px 4px;
             transition: all 0.3s;
+            display: inline-block;
         }
 
         .copy-button:hover {
             background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
         }
 
+        /* Участники */
         .participants {
-            margin-top: 20px;
+            margin-top: 24px;
+            animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
+        }
+
+        .participants h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            color: var(--text-primary);
         }
 
         .participant {
             display: flex;
             align-items: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            padding: 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .participant:hover {
+            transform: translateX(4px);
+            background: var(--bg-card-hover);
         }
 
         .participant-avatar {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            margin-right: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            margin-right: 16px;
+            flex-shrink: 0;
         }
 
         .participant-info {
@@ -203,12 +575,14 @@
 
         .participant-name {
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
         }
 
         .participant-wish {
-            font-size: 0.9em;
-            color: #666;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
         }
 
         .participant-actions {
@@ -224,103 +598,161 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        /* Карточка назначения */
+        .assignment-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px 28px;
+            border-radius: 24px;
+            text-align: center;
+            margin: 24px 0;
+            box-shadow: 0 16px 32px rgba(240, 147, 251, 0.4);
+            animation: fadeSlideUp 0.6s ease-out backwards;
+        }
+
+        .gift-icon {
+            font-size: 72px;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        .assignment-card h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .assignment-name {
+            font-size: 40px;
+            font-weight: 700;
+            margin: 24px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .wish-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            animation: fadeSlideUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .wish-box h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .wish-box p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Список комнат */
+        .room-list-item {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            animation: fadeSlideUp 0.6s ease-out backwards;
+        }
+
+        .room-list-item:nth-child(2) { animation-delay: 0.1s; }
+        .room-list-item:nth-child(3) { animation-delay: 0.2s; }
+
+        .room-list-item:hover {
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+            box-shadow: 0 12px 24px var(--shadow-color);
+        }
+
+        .room-list-item h4 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .room-list-item p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin: 6px 0;
         }
 
         .status-badge {
             display: inline-block;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 12px;
             font-weight: 600;
+            margin-top: 8px;
             margin-left: 10px;
         }
 
         .status-waiting {
-            background: #fff3cd;
-            color: #856404;
+            background: rgba(255, 193, 7, 0.2);
+            color: #ff9800;
         }
 
         .status-ready {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
         }
 
-        .assignment-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .assignment-card h2 {
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
-        .assignment-name {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .gift-icon {
-            font-size: 4em;
-            margin: 20px 0;
-            animation: bounce 2s infinite;
-        }
-
-        .room-list-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .room-list-item:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-        .room-list-item h4 {
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .room-list-item p {
-            color: #666;
-            font-size: 0.9em;
-            margin: 4px 0;
-        }
-
+        /* Пустое состояние */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: #666;
+            padding: 60px 20px;
+            color: var(--text-secondary);
         }
 
         .empty-state-icon {
-            font-size: 4em;
+            font-size: 80px;
             margin-bottom: 20px;
+            opacity: 0.5;
         }
 
+        /* Сообщения об ошибках/успехе */
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        /* Скрытие элементов */
         .hidden {
-            display: none;
+            display: none !important;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
+        /* Анимации */
+        @keyframes fadeSlideDown {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(-20px);
             }
             to {
                 opacity: 1;
@@ -328,271 +760,294 @@
             }
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
+        /* Адаптивность */
+        @media (max-width: 380px) {
+            .container {
+                padding: 20px 16px 80px;
+            }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+            .header h1 {
+                font-size: 28px;
+            }
 
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+            .action-card {
+                padding: 20px;
+            }
 
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        .info-box h4 {
-            color: #1976D2;
-            margin-bottom: 8px;
-        }
-
-        .info-box p {
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .share-link {
-            background: #e7f3ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 15px 0;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-
-        .admin-badge {
-            background: #ffd700;
-            color: #333;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            margin-left: 8px;
+            .card-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Лоадер -->
+    <div class="loader-overlay" id="loader">
+        <div>
+            <div class="loader"></div>
+            <div class="loader-text">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Декоративные элементы -->
+    <div class="bg-decorations" id="decorations"></div>
+
+    <!-- Переключатель темы -->
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</div>
+
+    <!-- Кнопка назад -->
+    <div class="back-button hidden" id="backButton" onclick="goBack()">←</div>
+
     <div class="container">
-        <div class="header">
-            <h1>🎅 Тайный Санта</h1>
-            <p>Создай новогоднее настроение!</p>
-        </div>
+        <!-- ========== ГЛАВНОЕ МЕНЮ ========== -->
+        <div id="mainMenu" class="hidden">
+            <div class="header">
+                <div class="header-icon">🎅</div>
+                <h1>Тайный Санта</h1>
+                <p>Создай новогоднее настроение!</p>
+            </div>
 
-        <!-- Главное меню -->
-        <div id="mainMenu" class="card hidden">
-            <button class="btn btn-primary" onclick="showCreateRoom()">
-                🎁 Создать комнату
-            </button>
-            <button class="btn btn-secondary" onclick="showJoinRoom()">
-                🚪 Присоединиться к комнате
-            </button>
-            <button class="btn btn-secondary" onclick="showMyRooms()">
-                📋 Мои комнаты
-            </button>
-            
-            <div class="info-box">
-                <h4>Как играть:</h4>
-                <p>1. Создайте комнату или присоединитесь к существующей<br>
-                2. Укажите свои пожелания к подарку<br>
-                3. Дождитесь всех участников<br>
-                4. Получите своего получателя подарка<br>
-                5. Подготовьте подарок и обменяйтесь в назначенный день!</p>
+            <div class="action-cards">
+                <div class="action-card" onclick="showCreateRoom()">
+                    <div class="card-content">
+                        <div class="card-icon card-icon-create">🎁</div>
+                        <div class="card-text">
+                            <h3>Создать комнату</h3>
+                            <p>Начни новую игру с друзьями</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="showJoinRoom()">
+                    <div class="card-content">
+                        <div class="card-icon card-icon-join">🚪</div>
+                        <div class="card-text">
+                            <h3>Присоединиться</h3>
+                            <p>Введи код комнаты</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="showMyRooms()">
+                    <div class="card-content">
+                        <div class="card-icon card-icon-my">📋</div>
+                        <div class="card-text">
+                            <h3>Мои комнаты</h3>
+                            <p>Посмотри свои игры</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h4>❄️ Как играть:</h4>
+                <ul>
+                    <li>Создай комнату или присоединись к существующей</li>
+                    <li>Укажи свои пожелания к подарку</li>
+                    <li>Дождись всех участников</li>
+                    <li>Получи своего получателя подарка</li>
+                    <li>Обменяйтесь подарками в назначенный день!</li>
+                </ul>
             </div>
         </div>
 
-        <!-- Список комнат пользователя -->
-        <div id="myRoomsScreen" class="hidden">
-            <div class="card">
-                <h2 style="margin-bottom: 20px;">Мои комнаты</h2>
-                <div id="roomsList"></div>
-                <button class="btn btn-secondary" onclick="showMainMenu()">
-                    Назад
-                </button>
-            </div>
-        </div>
-
-        <!-- Создание комнаты -->
+        <!-- ========== СОЗДАНИЕ КОМНАТЫ ========== -->
         <div id="createRoomScreen" class="hidden">
-            <div class="card">
-                <h2 style="margin-bottom: 20px;">Создание комнаты</h2>
-                
-                <div class="input-group">
-                    <label>Название игры</label>
-                    <input type="text" id="roomName" placeholder="Новогодняя вечеринка 2025">
-                </div>
-
-                <div class="input-group">
-                    <label>Максимальный бюджет (₽)</label>
-                    <input type="number" id="roomBudget" placeholder="1000">
-                </div>
-
-                <div class="input-group">
-                    <label>Дата обмена подарками</label>
-                    <input type="date" id="roomDate">
-                </div>
-
-                <div class="input-group">
-                    <label>Место вручения подарков</label>
-                    <input type="text" id="roomLocation" placeholder="Офис, кафе или адрес">
-                </div>
-
-                <div class="input-group">
-                    <label>Ваше имя</label>
-                    <input type="text" id="creatorName" placeholder="Иван">
-                </div>
-
-                <div class="input-group">
-                    <label>Ваши пожелания к подарку</label>
-                    <textarea id="creatorWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
-                </div>
-
-                <button class="btn btn-primary" onclick="createRoom()">
-                    Создать комнату
-                </button>
-                <button class="btn btn-secondary" onclick="showMainMenu()">
-                    Назад
-                </button>
+            <div class="header">
+                <div class="header-icon">🎁</div>
+                <h1>Создание комнаты</h1>
+                <p>Заполни информацию об игре</p>
             </div>
+
+            <div class="input-group">
+                <label>Название игры</label>
+                <input type="text" id="roomName" placeholder="Новогодняя вечеринка 2025">
+            </div>
+
+            <div class="input-group">
+                <label>Максимальный бюджет (₽)</label>
+                <input type="number" id="roomBudget" placeholder="1000">
+            </div>
+
+            <div class="input-group">
+                <label>Дата обмена подарками</label>
+                <input type="date" id="roomDate">
+            </div>
+
+            <div class="input-group">
+                <label>Место вручения подарков</label>
+                <input type="text" id="roomLocation" placeholder="Офис, кафе или адрес">
+            </div>
+
+            <div class="input-group">
+                <label>Ваше имя</label>
+                <input type="text" id="creatorName" placeholder="Иван">
+            </div>
+
+            <div class="input-group">
+                <label>Ваши пожелания к подарку</label>
+                <textarea id="creatorWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="createRoom()">
+                🎄 Создать комнату
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                Назад
+            </button>
         </div>
 
-        <!-- Присоединение к комнате -->
+        <!-- ========== ПРИСОЕДИНЕНИЕ К КОМНАТЕ ========== -->
         <div id="joinRoomScreen" class="hidden">
-            <div class="card">
-                <h2 style="margin-bottom: 20px;">Присоединиться</h2>
-                
-                <div class="input-group">
-                    <label>Код комнаты</label>
-                    <input type="text" id="joinCode" placeholder="ABCD1234" style="text-transform: uppercase;">
-                </div>
-
-                <div class="input-group">
-                    <label>Ваше имя</label>
-                    <input type="text" id="joinName" placeholder="Иван">
-                </div>
-
-                <div class="input-group">
-                    <label>Ваши пожелания к подарку</label>
-                    <textarea id="joinWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
-                </div>
-
-                <button class="btn btn-primary" onclick="joinRoom()">
-                    Присоединиться
-                </button>
-                <button class="btn btn-secondary" onclick="showMainMenu()">
-                    Назад
-                </button>
+            <div class="header">
+                <div class="header-icon">🚪</div>
+                <h1>Присоединиться</h1>
+                <p>Введи код комнаты от организатора</p>
             </div>
+
+            <div class="input-group">
+                <label>Код комнаты</label>
+                <input type="text" id="joinCode" placeholder="ABCD1234" style="text-transform: uppercase;">
+            </div>
+
+            <div class="input-group">
+                <label>Ваше имя</label>
+                <input type="text" id="joinName" placeholder="Иван">
+            </div>
+
+            <div class="input-group">
+                <label>Ваши пожелания к подарку</label>
+                <textarea id="joinWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="joinRoom()">
+                ✨ Присоединиться
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                Назад
+            </button>
         </div>
 
-        <!-- Экран комнаты -->
+        <!-- ========== МОИ КОМНАТЫ ========== -->
+        <div id="myRoomsScreen" class="hidden">
+            <div class="header">
+                <div class="header-icon">📋</div>
+                <h1>Мои комнаты</h1>
+                <p>Все твои активные игры</p>
+            </div>
+
+            <div id="roomsList"></div>
+
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
+        </div>
+
+        <!-- ========== ПРОСМОТР КОМНАТЫ ========== -->
         <div id="roomScreen" class="hidden">
-            <div class="card">
-                <h2 id="roomTitle" style="margin-bottom: 10px;"></h2>
-                <p id="roomInfo" style="color: #666; margin-bottom: 20px;"></p>
+            <div class="header">
+                <div class="header-icon">🎄</div>
+                <h1 id="roomTitle"></h1>
+                <p id="roomInfo"></p>
+            </div>
 
-                <div class="room-code">
-                    <h3>Код комнаты:</h3>
-                    <div class="code" id="displayCode"></div>
-                    <button class="copy-button" onclick="copyRoomCode()">
-                        📋 Копировать код
-                    </button>
-                    <button class="copy-button" onclick="shareRoom()">
-                        🔗 Поделиться ссылкой
-                    </button>
-                </div>
-
-                <div class="participants">
-                    <h3 style="margin-bottom: 15px;">
-                        Участники <span id="participantCount" class="status-badge status-waiting">0</span>
-                    </h3>
-                    <div id="participantsList"></div>
-                </div>
-
-                <button class="btn btn-success" id="startGameBtn" onclick="startGame()" style="margin-top: 20px;">
-                    🎲 Начать игру
+            <div class="room-code">
+                <h3>Код комнаты:</h3>
+                <div class="code" id="displayCode"></div>
+                <button class="copy-button" onclick="copyRoomCode()">
+                    📋 Копировать код
                 </button>
-                <button class="btn btn-warning hidden" id="transferAdminBtn" onclick="showTransferAdmin()">
-                    👑 Передать админку
-                </button>
-                <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">
-                    Покинуть комнату
-                </button>
-                <button class="btn btn-secondary" onclick="showMainMenu()">
-                    На главную
+                <button class="copy-button" onclick="shareRoom()">
+                    🔗 Поделиться ссылкой
                 </button>
             </div>
+
+            <div class="participants">
+                <h3>👥 Участники <span id="participantCount" class="status-badge status-waiting">0</span></h3>
+                <div id="participantsList"></div>
+            </div>
+
+            <button class="btn btn-success" id="startGameBtn" onclick="startGame()">
+                🎲 Начать игру
+            </button>
+            <button class="btn btn-warning hidden" id="transferAdminBtn" onclick="showTransferAdmin()">
+                👑 Передать админку
+            </button>
+            <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">
+                Покинуть комнату
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
         </div>
 
-        <!-- Экран назначения -->
+        <!-- ========== НАЗНАЧЕНИЕ (КТО ПОЛУЧАТЕЛЬ) ========== -->
         <div id="assignmentScreen" class="hidden">
-            <div class="card">
-                <div class="assignment-card">
-                    <div class="gift-icon">🎁</div>
-                    <h2>Вы дарите подарок:</h2>
-                    <div class="assignment-name" id="assignmentName"></div>
-                    <p id="assignmentUsername" style="font-size: 1.1em; margin-top: 10px;"></p>
-                    <p style="margin-top: 20px; font-size: 1.1em;">Бюджет: <strong id="assignmentBudget"></strong></p>
-                    <p style="margin-top: 10px; font-size: 1em;">📍 Место: <span id="assignmentLocation"></span></p>
-                </div>
-
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0;">
-                    <h3 style="margin-bottom: 10px;">💭 Пожелания:</h3>
-                    <p id="assignmentWish" style="color: #555; line-height: 1.6;"></p>
-                </div>
-
-                <div class="info-box">
-                    <h4>⚠️ Важно!</h4>
-                    <p>Сохраните это в тайне! Никто не должен знать, кто кому дарит подарок до момента обмена.</p>
-                </div>
-
-                <button class="btn btn-secondary" onclick="showMainMenu()">
-                    На главную
-                </button>
+            <div class="assignment-card">
+                <div class="gift-icon">🎁</div>
+                <h2>Ты даришь подарок:</h2>
+                <div class="assignment-name" id="assignmentName"></div>
+                <p id="assignmentUsername" style="font-size: 16px; margin-top: 10px;"></p>
+                <p style="margin-top: 20px; font-size: 18px;">💰 Бюджет: <strong id="assignmentBudget"></strong></p>
+                <p style="margin-top: 10px; font-size: 15px;">📍 <span id="assignmentLocation"></span></p>
             </div>
+
+            <div class="wish-box">
+                <h3>💭 Пожелания:</h3>
+                <p id="assignmentWish"></p>
+            </div>
+
+            <div class="info-card">
+                <h4>⚠️ Важно!</h4>
+                <ul>
+                    <li>Сохраните это в тайне до момента обмена</li>
+                    <li>Подготовьте подарок в рамках бюджета</li>
+                    <li>Придите вовремя на встречу обмена</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
         </div>
 
-        <!-- Передача админки -->
+        <!-- ========== ПЕРЕДАЧА АДМИНКИ ========== -->
         <div id="transferAdminScreen" class="hidden">
-            <div class="card">
-                <h2 style="margin-bottom: 20px;">Передать права администратора</h2>
-                
-                <div id="transferAdminList"></div>
-
-                <button class="btn btn-secondary" onclick="backToRoom()">
-                    Назад
-                </button>
+            <div class="header">
+                <div class="header-icon">👑</div>
+                <h1>Передать права</h1>
+                <p>Выбери нового администратора</p>
             </div>
+
+            <div id="transferAdminList"></div>
+
+            <button class="btn btn-secondary" onclick="backToRoom()">
+                Назад
+            </button>
         </div>
     </div>
 
     <script>
+        // ============= TELEGRAM WEBAPP =============
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.MainButton.hide();
-
-        document.body.style.background = tg.themeParams.bg_color || document.body.style.background;
 
         let currentRoomCode = null;
         let currentUserId = null;
@@ -605,63 +1060,84 @@
 
         const BOT_USERNAME = 'SecretSantaDrawBot';
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ru-RU', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            });
+        // ============= LOADER =============
+        function showLoader(text = 'Загрузка...') {
+            const loader = document.getElementById('loader');
+            const loaderText = loader.querySelector('.loader-text');
+            loaderText.textContent = text;
+            loader.classList.add('active');
         }
 
-        // УЛУЧШЕННАЯ инициализация с поддержкой deep links
-        window.addEventListener('load', async () => {
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                currentUserId = user.id.toString();
-                currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                currentUsername = user.username || '';
-                
-                document.getElementById('creatorName').value = currentUserName;
-                document.getElementById('joinName').value = currentUserName;
-            } else {
-                currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
-            }
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            loader.classList.remove('active');
+        }
 
-            // ИСПРАВЛЕННАЯ логика обработки start_param
-            let startParam = null;
+        // ============= THEME =============
+        function applyTelegramTheme() {
+            const themeParams = tg.themeParams;
+            const toggle = document.getElementById('themeToggle');
             
-            // Способ 1: Через initDataUnsafe (работает при первом запуске бота)
-            if (tg.initDataUnsafe?.start_param) {
-                startParam = tg.initDataUnsafe.start_param;
-                console.log('Start param из initDataUnsafe:', startParam);
-            }
-            
-            // Способ 2: Через URL hash (работает при открытии Mini App)
-            const hashParams = new URLSearchParams(window.location.hash.slice(1));
-            const hashStartParam = hashParams.get('tgWebAppStartParam');
-            if (hashStartParam) {
-                startParam = hashStartParam;
-                console.log('Start param из URL hash:', startParam);
-            }
-
-            // Обрабатываем start_param
-            if (startParam && startParam.startsWith('join_')) {
-                const roomCode = startParam.replace('join_', '').toUpperCase();
-                console.log('Автозаполнение кода комнаты:', roomCode);
-                document.getElementById('joinCode').value = roomCode;
-                showJoinRoom();
+            if (tg.colorScheme === 'dark') {
+                document.body.classList.remove('light-theme');
+                toggle.textContent = '🌙';
             } else {
-                await loadUserRooms();
+                document.body.classList.add('light-theme');
+                toggle.textContent = '☀️';
             }
-        });
+        }
 
+        function toggleTheme() {
+            const body = document.body;
+            const toggle = document.getElementById('themeToggle');
+            
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                toggle.textContent = '🌙';
+            } else {
+                body.classList.add('light-theme');
+                toggle.textContent = '☀️';
+            }
+        }
+
+        // ============= SNOWFLAKES =============
+        function createSnowflakes() {
+            const decorations = document.getElementById('decorations');
+            const snowflakes = ['❄', '❅', '❆', '✻', '✼'];
+            
+            for (let i = 0; i < 15; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowflake.style.fontSize = (Math.random() * 16 + 16) + 'px';
+                decorations.appendChild(snowflake);
+            }
+        }
+
+        // ============= NAVIGATION =============
         function showScreen(screenId) {
             document.querySelectorAll('.container > div').forEach(el => {
-                if (el.classList.contains('header')) return;
+                if (!el.id) return;
                 el.classList.add('hidden');
             });
+
             document.getElementById(screenId).classList.remove('hidden');
+            
+            const backButton = document.getElementById('backButton');
+            if (screenId === 'mainMenu') {
+                backButton.classList.add('hidden');
+            } else {
+                backButton.classList.remove('hidden');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBack() {
+            showMainMenu();
         }
 
         async function showMainMenu() {
@@ -686,6 +1162,17 @@
             await displayUserRooms();
         }
 
+        // ============= UTILITY =============
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ru-RU', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        }
+
+        // ============= API FUNCTIONS =============
         async function loadUserRooms() {
             try {
                 const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
@@ -706,13 +1193,17 @@
 
         async function displayUserRooms() {
             const roomsList = document.getElementById('roomsList');
-            roomsList.innerHTML = '<div class="loading">Загрузка...</div>';
+            roomsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Загрузка...</div>';
+            
+            showLoader('Загрузка комнат...');
             
             try {
                 const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
                 if (!response.ok) throw new Error('Ошибка загрузки комнат');
                 
                 const data = await response.json();
+                
+                hideLoader();
                 
                 if (!data.rooms || data.rooms.length === 0) {
                     roomsList.innerHTML = `
@@ -735,6 +1226,7 @@
                     </div>
                 `).join('');
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 roomsList.innerHTML = '<div class="error">Ошибка загрузки комнат</div>';
             }
@@ -771,6 +1263,8 @@
                 }
             };
 
+            showLoader('Создание комнаты...');
+
             try {
                 const response = await fetch(`${API_URL}/rooms/create`, {
                     method: 'POST',
@@ -787,9 +1281,12 @@
                 const result = await response.json();
                 currentRoomCode = result.code;
 
+                hideLoader();
+
                 await loadRoomFromAPI(result.code);
                 tg.showAlert('Комната создана! Поделитесь кодом с друзьями.');
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert('Ошибка при создании комнаты: ' + error.message);
             }
@@ -804,6 +1301,8 @@
                 tg.showAlert('Пожалуйста, заполните все поля');
                 return;
             }
+
+            showLoader('Присоединение...');
 
             try {
                 const response = await fetch(`${API_URL}/rooms/join`, {
@@ -828,15 +1327,19 @@
                 }
 
                 currentRoomCode = code;
+                hideLoader();
                 await loadRoomFromAPI(code);
                 tg.showAlert('Вы успешно присоединились!');
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert(error.message || 'Ошибка при присоединении к комнате');
             }
         }
 
         async function loadRoomFromAPI(code) {
+            showLoader('Загрузка комнаты...');
+
             try {
                 const response = await fetch(`${API_URL}/rooms/${code}?telegram_id=${currentUserId}`);
                 
@@ -845,6 +1348,7 @@
                 }
                 
                 const room = await response.json();
+                hideLoader();
                 displayRoom(code, room);
                 showScreen('roomScreen');
                 
@@ -852,6 +1356,7 @@
                     await loadAssignment(code);
                 }
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert('Ошибка при загрузке комнаты: ' + error.message);
             }
@@ -880,7 +1385,7 @@
                         <div class="participant-info">
                             <div class="participant-name">
                                 ${p.name}
-                                ${p.telegram_username ? `<span style="color: #888;">(@${p.telegram_username})</span>` : ''}
+                                ${p.telegram_username ? `<span style="color: var(--text-tertiary);">(@${p.telegram_username})</span>` : ''}
                             </div>
                             <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
                         </div>
@@ -937,6 +1442,8 @@
                 return;
             }
 
+            showLoader('Запуск игры...');
+
             try {
                 const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
                     method: 'POST'
@@ -947,15 +1454,19 @@
                     throw new Error(error.detail || 'Ошибка при запуске игры');
                 }
 
+                hideLoader();
                 await loadAssignment(currentRoomCode);
                 tg.showAlert('Игра началась! Все участники получили уведомления.');
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert(error.message || 'Ошибка при запуске игры');
             }
         }
 
         async function loadAssignment(code) {
+            showLoader('Загрузка назначения...');
+
             try {
                 const response = await fetch(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
                 
@@ -964,8 +1475,10 @@
                 }
                 
                 const assignment = await response.json();
+                hideLoader();
                 showAssignment(assignment);
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
             }
@@ -983,7 +1496,7 @@
             }
             
             document.getElementById('assignmentBudget').textContent = `${assignment.budget}₽`;
-            document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточняется';
+            document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточнется';
             document.getElementById('assignmentWish').textContent = 
                 assignment.receiver_wish || 'Участник не указал пожелания';
             
@@ -997,6 +1510,8 @@
                 return;
             }
 
+            showLoader('Выход из комнаты...');
+
             try {
                 const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/leave?telegram_id=${currentUserId}`, {
                     method: 'POST'
@@ -1007,9 +1522,11 @@
                     throw new Error(error.detail || 'Ошибка при выходе из комнаты');
                 }
 
+                hideLoader();
                 tg.showAlert('Вы покинули комнату');
                 showMainMenu();
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert(error.message || 'Ошибка при выходе из комнаты');
             }
@@ -1022,6 +1539,8 @@
                 return;
             }
 
+            showLoader('Удаление участника...');
+
             try {
                 const response = await fetch(
                     `${API_URL}/rooms/${currentRoomCode}/participant/${participantId}?admin_telegram_id=${currentUserId}`,
@@ -1033,9 +1552,11 @@
                     throw new Error(error.detail || 'Ошибка при удалении участника');
                 }
 
+                hideLoader();
                 tg.showAlert('Участник удален');
                 await loadRoomFromAPI(currentRoomCode);
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert(error.message || 'Ошибка при удалении участника');
             }
@@ -1074,16 +1595,13 @@
         function shareRoom() {
             if (!currentRoomCode) return;
             
-            // Создаем deep link с правильным форматом
             const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
             const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
             
-            // Используем Telegram Share API
             if (tg.openTelegramLink) {
                 const encodedText = encodeURIComponent(shareText);
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
             } else {
-                // Fallback: копируем текст
                 const fullText = `${shareText}\n\n${shareUrl}`;
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(fullText).then(() => {
@@ -1095,9 +1613,10 @@
             }
         }
 
-        // НОВОЕ: Передача админки
         async function showTransferAdmin() {
             if (!currentRoomCode) return;
+
+            showLoader('Загрузка участников...');
 
             try {
                 const response = await fetch(`${API_URL}/rooms/${currentRoomCode}?telegram_id=${currentUserId}`);
@@ -1105,6 +1624,8 @@
                 
                 const room = await response.json();
                 const participants = room.participants.filter(p => p.telegram_id !== currentUserId);
+                
+                hideLoader();
                 
                 if (participants.length === 0) {
                     tg.showAlert('Нет других участников для передачи прав');
@@ -1127,6 +1648,7 @@
                 document.getElementById('transferAdminList').innerHTML = listHtml;
                 showScreen('transferAdminScreen');
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert('Ошибка загрузки участников');
             }
@@ -1136,6 +1658,8 @@
             if (!confirm(`Передать права администратора пользователю ${newAdminName}?`)) {
                 return;
             }
+
+            showLoader('Передача прав...');
 
             try {
                 const response = await fetch(
@@ -1156,9 +1680,11 @@
                     throw new Error(error.detail || 'Ошибка передачи прав');
                 }
 
+                hideLoader();
                 tg.showAlert('Права администратора переданы!');
                 await loadRoomFromAPI(currentRoomCode);
             } catch (error) {
+                hideLoader();
                 console.error('Error:', error);
                 tg.showAlert(error.message || 'Ошибка передачи прав');
             }
@@ -1171,6 +1697,53 @@
                 showMainMenu();
             }
         }
+
+        // ============= INITIALIZATION =============
+        window.addEventListener('load', async () => {
+            createSnowflakes();
+            applyTelegramTheme();
+            
+            showLoader('Инициализация...');
+
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                currentUserId = user.id.toString();
+                currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                currentUsername = user.username || '';
+                
+                document.getElementById('creatorName').value = currentUserName;
+                document.getElementById('joinName').value = currentUserName;
+            } else {
+                currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Обработка start_param для deep links
+            let startParam = null;
+            
+            if (tg.initDataUnsafe?.start_param) {
+                startParam = tg.initDataUnsafe.start_param;
+                console.log('Start param из initDataUnsafe:', startParam);
+            }
+            
+            const hashParams = new URLSearchParams(window.location.hash.slice(1));
+            const hashStartParam = hashParams.get('tgWebAppStartParam');
+            if (hashStartParam) {
+                startParam = hashStartParam;
+                console.log('Start param из URL hash:', startParam);
+            }
+
+            // Обрабатываем start_param
+            if (startParam && startParam.startsWith('join_')) {
+                const roomCode = startParam.replace('join_', '').toUpperCase();
+                console.log('Автозаполнение кода комнаты:', roomCode);
+                document.getElementById('joinCode').value = roomCode;
+                hideLoader();
+                showJoinRoom();
+            } else {
+                hideLoader();
+                await loadUserRooms();
+            }
+        });
     </script>
 </body>
 </html>
