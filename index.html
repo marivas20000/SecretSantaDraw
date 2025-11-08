@@ -154,7 +154,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .theme-toggle:hover {
@@ -1074,30 +1074,56 @@
         }
 
         // ============= THEME =============
-        function applyTelegramTheme() {
-            const themeParams = tg.themeParams;
+        let themeMode = 'auto'; // 'auto', 'light', 'dark'
+
+        function applyTheme(mode) {
+            const body = document.body;
             const toggle = document.getElementById('themeToggle');
             
-            if (tg.colorScheme === 'dark') {
-                document.body.classList.remove('light-theme');
-                toggle.textContent = '🌙';
-            } else {
-                document.body.classList.add('light-theme');
+            if (mode === 'auto') {
+                // Применяем тему из Telegram
+                if (tg.colorScheme === 'dark') {
+                    body.classList.remove('light-theme');
+                } else {
+                    body.classList.add('light-theme');
+                }
+                toggle.textContent = '🌓';
+                toggle.title = 'Авто (как в системе)';
+            } else if (mode === 'light') {
+                body.classList.add('light-theme');
                 toggle.textContent = '☀️';
+                toggle.title = 'Светлая тема';
+            } else if (mode === 'dark') {
+                body.classList.remove('light-theme');
+                toggle.textContent = '🌙';
+                toggle.title = 'Тёмная тема';
             }
         }
 
         function toggleTheme() {
-            const body = document.body;
-            const toggle = document.getElementById('themeToggle');
-            
-            if (body.classList.contains('light-theme')) {
-                body.classList.remove('light-theme');
-                toggle.textContent = '🌙';
+            // Цикл: auto -> light -> dark -> auto
+            if (themeMode === 'auto') {
+                themeMode = 'light';
+            } else if (themeMode === 'light') {
+                themeMode = 'dark';
             } else {
-                body.classList.add('light-theme');
-                toggle.textContent = '☀️';
+                themeMode = 'auto';
             }
+            
+            applyTheme(themeMode);
+            localStorage.setItem('themeMode', themeMode);
+        }
+
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem('themeMode');
+            
+            if (savedTheme && ['auto', 'light', 'dark'].includes(savedTheme)) {
+                themeMode = savedTheme;
+            } else {
+                themeMode = 'auto';
+            }
+            
+            applyTheme(themeMode);
         }
 
         // ============= SNOWFLAKES =============
@@ -1701,7 +1727,7 @@
         // ============= INITIALIZATION =============
         window.addEventListener('load', async () => {
             createSnowflakes();
-            applyTelegramTheme();
+            loadSavedTheme(); // Загружаем сохранённую тему
             
             showLoader('Инициализация...');
 
