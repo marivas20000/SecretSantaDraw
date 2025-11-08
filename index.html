@@ -1387,7 +1387,7 @@
                                 ${p.name}
                                 ${p.telegram_username ? `<span style="color: var(--text-tertiary);">(@${p.telegram_username})</span>` : ''}
                             </div>
-                            <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
+                            ${p.wish ? `<div class="participant-wish">${p.wish}</div>` : ''}
                         </div>
                         ${room.is_creator && p.telegram_id !== currentUserId && !room.started ? `
                             <div class="participant-actions">
