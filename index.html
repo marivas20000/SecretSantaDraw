@@ -26,7 +26,7 @@
         }
 
         :root {
-            /* Темная тема (по умолчанию) */
+            /* Тёмная тема (по умолчанию) */
             --bg-primary: linear-gradient(180deg, #1a5f4e 0%, #0d3d2f 100%);
             --bg-card: rgba(255, 255, 255, 0.1);
             --bg-card-hover: rgba(255, 255, 255, 0.15);
@@ -337,14 +337,14 @@
 
         /* Информационная карточка */
         .info-card {
-        background: var(--bg-card);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        padding: 24px;
-        border: 1px solid var(--border-color);
-        animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
-        margin-bottom: 20px; /* Добавьте эту строку */
-    }
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
+            margin-bottom: 20px;
+        }
 
         .info-card h4 {
             font-size: 16px;
@@ -381,7 +381,7 @@
         .input-group {
             margin-bottom: 20px;
             animation: fadeSlideUp 0.6s ease-out backwards;
-            overflow: hidden; /* Добавьте эту строку */
+            overflow: hidden;
         }
 
         .input-group:nth-child(2) { animation-delay: 0.1s; }
@@ -399,8 +399,8 @@
         .input-group input,
         .input-group textarea {
             width: 100%;
-            max-width: 100%; /* Добавлено */
-            min-width: 0; /* Добавлено */
+            max-width: 100%;
+            min-width: 0;
             padding: 16px;
             background: var(--input-bg);
             backdrop-filter: blur(20px);
@@ -410,7 +410,7 @@
             color: var(--text-primary);
             transition: all 0.3s ease;
             font-family: inherit;
-            box-sizing: border-box; /* Убедитесь что это есть */
+            box-sizing: border-box;
         }
 
         /* Специальное правило именно для поля даты */
@@ -1138,7 +1138,6 @@
             const toggle = document.getElementById('themeToggle');
             
             if (mode === 'auto') {
-                // Применяем тему из Telegram
                 if (tg.colorScheme === 'dark') {
                     body.classList.remove('light-theme');
                 } else {
@@ -1158,7 +1157,6 @@
         }
 
         function toggleTheme() {
-            // Цикл: auto -> light -> dark -> auto
             if (themeMode === 'auto') {
                 themeMode = 'light';
             } else if (themeMode === 'light') {
@@ -1784,7 +1782,7 @@
         // ============= INITIALIZATION =============
         window.addEventListener('load', async () => {
             createSnowflakes();
-            loadSavedTheme(); // Загружаем сохранённую тему
+            loadSavedTheme();
             
             showLoader('Инициализация...');
 
