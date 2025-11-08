@@ -217,6 +217,7 @@
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 8px;
+            color: var(--text-primary);
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1763,343 +1764,344 @@
                         exchange_date: date,
                         exchange_location: location || null,
                         hide_participants: hideParticipants
-                        })
+                    })
+                });
+                
+                if (!result) return;
+
+                hideLoader();
+                tg.showAlert('Изменения сохранены!');
+                await loadRoomFromAPI(currentRoomCode);
+            } catch (error) {
+                hideLoader();
+                console.error('Error:', error);
+                tg.showAlert('Ошибка при сохранении: ' + error.message);
+            }
+        }
+
+        async function startGame() {
+            if (!currentRoomCode) return;
+
+            tg.showConfirm('Начать игру? После этого нельзя будет добавить новых участников.', async (confirmed) => {
+                if (!confirmed) return;
+
+                showLoader('Запуск игры...');
+
+                try {
+                    const result = await apiCall(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
+                        method: 'POST'
+                    });
+
+                    if (!result) return;
+
+                    hideLoader();
+                    await loadAssignment(currentRoomCode);
+                    tg.showAlert('Игра началась! Все участники получили уведомления.');
+                } catch (error) {
+                    hideLoader();
+                    console.error('Error:', error);
+                    tg.showAlert(error.message || 'Ошибка при запуске игры');
+                }
             });
-        if (!result) return;
-
-            hideLoader();
-            tg.showAlert('Изменения сохранены!');
-            await loadRoomFromAPI(currentRoomCode);
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert('Ошибка при сохранении: ' + error.message);
-        }
-    }
-
-    async function startGame() {
-        if (!currentRoomCode) return;
-
-        if (!confirm('Начать игру? После этого нельзя будет добавить новых участников.')) {
-            return;
         }
 
-        showLoader('Запуск игры...');
+        async function loadAssignment(code) {
+            showLoader('Загрузка назначения...');
 
-        try {
-            const result = await apiCall(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
-                method: 'POST'
-            });
-
-            if (!result) return;
-
-            hideLoader();
-            await loadAssignment(currentRoomCode);
-            tg.showAlert('Игра началась! Все участники получили уведомления.');
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert(error.message || 'Ошибка при запуске игры');
+            try {
+                const assignment = await apiCall(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
+                
+                if (!assignment) return;
+                
+                hideLoader();
+                showAssignment(assignment);
+            } catch (error) {
+                hideLoader();
+                console.error('Error:', error);
+                tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
+            }
         }
-    }
 
-    async function loadAssignment(code) {
-        showLoader('Загрузка назначения...');
-
-        try {
-            const assignment = await apiCall(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
+        function showAssignment(assignment) {
+            const avatarEl = document.getElementById('assignmentAvatar');
+            setAvatarOrInitial(avatarEl, assignment.receiver_name, assignment.receiver_telegram_id);
             
-            if (!assignment) return;
+            document.getElementById('assignmentName').textContent = assignment.receiver_name;
             
-            hideLoader();
-            showAssignment(assignment);
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
-        }
-    }
-
-    function showAssignment(assignment) {
-        const avatarEl = document.getElementById('assignmentAvatar');
-        setAvatarOrInitial(avatarEl, assignment.receiver_name, assignment.receiver_telegram_id);
-        
-        document.getElementById('assignmentName').textContent = assignment.receiver_name;
-        
-        const usernameEl = document.getElementById('assignmentUsername');
-        if (assignment.receiver_username) {
-            usernameEl.textContent = `@${assignment.receiver_username}`;
-            usernameEl.href = `tg://resolve?domain=${assignment.receiver_username}`;
-            usernameEl.style.display = 'block';
-        } else {
-            usernameEl.style.display = 'none';
-        }
-        
-        document.getElementById('assignmentBudget').textContent = `${assignment.budget}₽`;
-        document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточнится';
-        document.getElementById('assignmentWish').textContent = 
-            assignment.receiver_wish || 'Участник не указал пожелания';
-        
-        showScreen('assignmentScreen');
-    }
-
-    async function leaveRoom() {
-        if (!currentRoomCode) return;
-
-        if (!confirm('Вы уверены, что хотите покинуть комнату?')) {
-            return;
+            const usernameEl = document.getElementById('assignmentUsername');
+            if (assignment.receiver_username) {
+                usernameEl.textContent = `@${assignment.receiver_username}`;
+                usernameEl.href = `tg://resolve?domain=${assignment.receiver_username}`;
+                usernameEl.style.display = 'block';
+            } else {
+                usernameEl.style.display = 'none';
+            }
+            
+            document.getElementById('assignmentBudget').textContent = `${assignment.budget}₽`;
+            document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточнится';
+            document.getElementById('assignmentWish').textContent = 
+                assignment.receiver_wish || 'Участник не указал пожелания';
+            
+            showScreen('assignmentScreen');
         }
 
-        showLoader('Выход из комнаты...');
+        async function leaveRoom() {
+            if (!currentRoomCode) return;
 
-        try {
-            const result = await apiCall(`${API_URL}/rooms/${currentRoomCode}/leave?telegram_id=${currentUserId}`, {
-                method: 'POST'
+            tg.showConfirm('Вы уверены, что хотите покинуть комнату?', async (confirmed) => {
+                if (!confirmed) return;
+
+                showLoader('Выход из комнаты...');
+
+                try {
+                    const result = await apiCall(`${API_URL}/rooms/${currentRoomCode}/leave?telegram_id=${currentUserId}`, {
+                        method: 'POST'
+                    });
+
+                    if (!result) return;
+
+                    hideLoader();
+                    tg.showAlert('Вы покинули комнату');
+                    showMainMenu();
+                } catch (error) {
+                    hideLoader();
+                    console.error('Error:', error);
+                    tg.showAlert(error.message || 'Ошибка при выходе из комнаты');
+                }
             });
-
-            if (!result) return;
-
-            hideLoader();
-            tg.showAlert('Вы покинули комнату');
-            showMainMenu();
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert(error.message || 'Ошибка при выходе из комнаты');
-        }
-    }
-
-    async function removeParticipant(participantId) {
-        if (!currentRoomCode) return;
-
-        if (!confirm('Удалить этого участника из комнаты?')) {
-            return;
         }
 
-        showLoader('Удаление участника...');
+        async function removeParticipant(participantId) {
+            if (!currentRoomCode) return;
 
-        try {
-            const result = await apiCall(
-                `${API_URL}/rooms/${currentRoomCode}/participant/${participantId}?admin_telegram_id=${currentUserId}`,
-                { method: 'DELETE' }
-            );
+            tg.showConfirm('Удалить этого участника из комнаты?', async (confirmed) => {
+                if (!confirmed) return;
 
-            if (!result) return;
+                showLoader('Удаление участника...');
 
-            hideLoader();
-            tg.showAlert('Участник удален');
-            await loadRoomFromAPI(currentRoomCode);
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert(error.message || 'Ошибка при удалении участника');
-        }
-    }
+                try {
+                    const result = await apiCall(
+                        `${API_URL}/rooms/${currentRoomCode}/participant/${participantId}?admin_telegram_id=${currentUserId}`,
+                        { method: 'DELETE' }
+                    );
 
-    function copyRoomCode() {
-        const code = document.getElementById('displayCode').textContent;
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(code).then(() => {
-                tg.showAlert('Код скопирован: ' + code);
-            }).catch(() => {
-                fallbackCopy(code);
+                    if (!result) return;
+
+                    hideLoader();
+                    tg.showAlert('Участник удален');
+                    await loadRoomFromAPI(currentRoomCode);
+                } catch (error) {
+                    hideLoader();
+                    console.error('Error:', error);
+                    tg.showAlert(error.message || 'Ошибка при удалении участника');
+                }
             });
-        } else {
-            fallbackCopy(code);
         }
-    }
 
-    function fallbackCopy(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            tg.showAlert('Код скопирован: ' + text);
-        } catch (err) {
-            tg.showAlert('Код комнаты: ' + text);
-        }
-        document.body.removeChild(textarea);
-    }
-
-    function shareRoom() {
-        if (!currentRoomCode) return;
-        
-        const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
-        const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
-        
-        if (tg.openTelegramLink) {
-            const encodedText = encodeURIComponent(shareText);
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
-        } else {
-            const fullText = `${shareText}\n\n${shareUrl}`;
+        function copyRoomCode() {
+            const code = document.getElementById('displayCode').textContent;
+            
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(fullText).then(() => {
-                    tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
+                navigator.clipboard.writeText(code).then(() => {
+                    tg.showAlert('Код скопирован: ' + code);
+                }).catch(() => {
+                    fallbackCopy(code);
                 });
             } else {
-                tg.showAlert(`Отправьте друзьям:\n${fullText}`);
+                fallbackCopy(code);
             }
         }
-    }
 
-    async function showTransferAdmin() {
-        if (!currentRoomCode) return;
-
-        showLoader('Загрузка участников...');
-
-        try {
-            const room = await apiCall(`${API_URL}/rooms/${currentRoomCode}?telegram_id=${currentUserId}`);
-            
-            if (!room) return;
-            
-            const participants = room.participants.filter(p => p.telegram_id !== currentUserId);
-            
-            hideLoader();
-            
-            if (participants.length === 0) {
-                tg.showAlert('Нет других участников для передачи прав');
-                return;
-            }
-
-            const listHtml = participants.map(p => `
-                <div class="participant" style="margin-bottom: 10px;">
-                    <div class="participant-avatar" data-admin-user-id="${p.telegram_id}" data-admin-user-name="${p.name}"></div>
-                    <div class="participant-info">
-                        <div class="participant-name">${p.name}</div>
-                    </div>
-                    <button class="btn btn-warning" style="width: auto; padding: 8px 16px; margin: 0;" 
-                            onclick="transferAdminTo('${p.telegram_id}', '${p.name}')">
-                        Передать
-                    </button>
-                </div>
-            `).join('');
-
-            document.getElementById('transferAdminList').innerHTML = listHtml;
-            
-            participants.forEach(p => {
-                const avatarEl = document.querySelector(`[data-admin-user-id="${p.telegram_id}"]`);
-                if (avatarEl) {
-                    setAvatarOrInitial(avatarEl, p.name, p.telegram_id);
-                }
-            });
-            
-            showScreen('transferAdminScreen');
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert('Ошибка загрузки участников');
-        }
-    }
-
-    async function transferAdminTo(newAdminId, newAdminName) {
-        if (!confirm(`Передать права администратора пользователю ${newAdminName}?`)) {
-            return;
-        }
-
-        showLoader('Передача прав...');
-
-        try {
-            const result = await apiCall(
-                `${API_URL}/rooms/${currentRoomCode}/transfer-admin?current_admin_id=${currentUserId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        new_admin_telegram_id: newAdminId
-                    })
-                }
-            );
-
-            if (!result) return;
-
-            hideLoader();
-            tg.showAlert('Права администратора переданы!');
-            await loadRoomFromAPI(currentRoomCode);
-        } catch (error) {
-            hideLoader();
-            console.error('Error:', error);
-            tg.showAlert(error.message || 'Ошибка передачи прав');
-        }
-    }
-
-    async function backToRoom() {
-        if (currentRoomCode) {
-            await loadRoomFromAPI(currentRoomCode);
-        } else {
-            showMainMenu();
-        }
-    }
-
-    window.addEventListener('load', async () => {
-        createSnowflakes();
-        loadSavedTheme();
-        
-        showLoader('Инициализация...');
-
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            currentUserId = user.id.toString();
-            currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-            currentUsername = user.username || '';
-            
-            document.getElementById('creatorName').value = currentUserName;
-            document.getElementById('joinName').value = currentUserName;
-        } else {
-            currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        let startParam = null;
-        
-        if (tg.initDataUnsafe?.start_param) {
-            startParam = tg.initDataUnsafe.start_param;
-        }
-        
-        const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const hashStartParam = hashParams.get('tgWebAppStartParam');
-        if (hashStartParam) {
-            startParam = hashStartParam;
-        }
-
-        if (startParam && startParam.startsWith('join_')) {
-            const roomCode = startParam.replace('join_', '').toUpperCase();
-            
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
             try {
-                const room = await apiCall(`${API_URL}/rooms/${roomCode}?telegram_id=${currentUserId}`);
+                document.execCommand('copy');
+                tg.showAlert('Код скопирован: ' + text);
+            } catch (err) {
+                tg.showAlert('Код комнаты: ' + text);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function shareRoom() {
+            if (!currentRoomCode) return;
+            
+            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
+            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
+            
+            if (tg.openTelegramLink) {
+                const encodedText = encodeURIComponent(shareText);
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
+            } else {
+                const fullText = `${shareText}\n\n${shareUrl}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(fullText).then(() => {
+                        tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
+                    });
+                } else {
+                    tg.showAlert(`Отправьте друзьям:\n${fullText}`);
+                }
+            }
+        }
+
+        async function showTransferAdmin() {
+            if (!currentRoomCode) return;
+
+            showLoader('Загрузка участников...');
+
+            try {
+                const room = await apiCall(`${API_URL}/rooms/${currentRoomCode}?telegram_id=${currentUserId}`);
                 
                 if (!room) return;
                 
-                if (room.participants && room.participants.some(p => p.telegram_id === currentUserId)) {
-                    currentRoomCode = roomCode;
-                    hideLoader();
-                    displayRoom(roomCode, room);
-                    showScreen('roomScreen');
-                    
-                    if (room.started) {
-                        await loadAssignment(roomCode);
+                const participants = room.participants.filter(p => p.telegram_id !== currentUserId);
+                
+                hideLoader();
+                
+                if (participants.length === 0) {
+                    tg.showAlert('Нет других участников для передачи прав');
+                    return;
+                }
+
+                const listHtml = participants.map(p => `
+                    <div class="participant" style="margin-bottom: 10px;">
+                        <div class="participant-avatar" data-admin-user-id="${p.telegram_id}" data-admin-user-name="${p.name}"></div>
+                        <div class="participant-info">
+                            <div class="participant-name">${p.name}</div>
+                        </div>
+                        <button class="btn btn-warning" style="width: auto; padding: 8px 16px; margin: 0;" 
+                                onclick="transferAdminTo('${p.telegram_id}', '${p.name}')">
+                            Передать
+                        </button>
+                    </div>
+                `).join('');
+
+                document.getElementById('transferAdminList').innerHTML = listHtml;
+                
+                participants.forEach(p => {
+                    const avatarEl = document.querySelector(`[data-admin-user-id="${p.telegram_id}"]`);
+                    if (avatarEl) {
+                        setAvatarOrInitial(avatarEl, p.name, p.telegram_id);
                     }
-                } else {
+                });
+                
+                showScreen('transferAdminScreen');
+            } catch (error) {
+                hideLoader();
+                console.error('Error:', error);
+                tg.showAlert('Ошибка загрузки участников');
+            }
+        }
+
+        async function transferAdminTo(newAdminId, newAdminName) {
+            tg.showConfirm(`Передать права администратора пользователю ${newAdminName}?`, async (confirmed) => {
+                if (!confirmed) return;
+
+                showLoader('Передача прав...');
+
+                try {
+                    const result = await apiCall(
+                        `${API_URL}/rooms/${currentRoomCode}/transfer-admin?current_admin_id=${currentUserId}`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                new_admin_telegram_id: newAdminId
+                            })
+                        }
+                    );
+
+                    if (!result) return;
+
+                    hideLoader();
+                    tg.showAlert('Права администратора переданы!');
+                    await loadRoomFromAPI(currentRoomCode);
+                } catch (error) {
+                    hideLoader();
+                    console.error('Error:', error);
+                    tg.showAlert(error.message || 'Ошибка передачи прав');
+                }
+            });
+        }
+
+        async function backToRoom() {
+            if (currentRoomCode) {
+                await loadRoomFromAPI(currentRoomCode);
+            } else {
+                showMainMenu();
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            createSnowflakes();
+            loadSavedTheme();
+            
+            showLoader('Инициализация...');
+
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                currentUserId = user.id.toString();
+                currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                currentUsername = user.username || '';
+                
+                document.getElementById('creatorName').value = currentUserName;
+                document.getElementById('joinName').value = currentUserName;
+            } else {
+                currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            let startParam = null;
+            
+            if (tg.initDataUnsafe?.start_param) {
+                startParam = tg.initDataUnsafe.start_param;
+            }
+            
+            const hashParams = new URLSearchParams(window.location.hash.slice(1));
+            const hashStartParam = hashParams.get('tgWebAppStartParam');
+            if (hashStartParam) {
+                startParam = hashStartParam;
+            }
+
+            if (startParam && startParam.startsWith('join_')) {
+                const roomCode = startParam.replace('join_', '').toUpperCase();
+                
+                try {
+                    const room = await apiCall(`${API_URL}/rooms/${roomCode}?telegram_id=${currentUserId}`);
+                    
+                    if (!room) return;
+                    
+                    if (room.participants && room.participants.some(p => p.telegram_id === currentUserId)) {
+                        currentRoomCode = roomCode;
+                        hideLoader();
+                        displayRoom(roomCode, room);
+                        showScreen('roomScreen');
+                        
+                        if (room.started) {
+                            await loadAssignment(roomCode);
+                        }
+                    } else {
+                        document.getElementById('joinCode').value = roomCode;
+                        hideLoader();
+                        showJoinRoom();
+                    }
+                } catch (error) {
+                    console.error('Ошибка проверки комнаты:', error);
                     document.getElementById('joinCode').value = roomCode;
                     hideLoader();
                     showJoinRoom();
                 }
-            } catch (error) {
-                console.error('Ошибка проверки комнаты:', error);
-                document.getElementById('joinCode').value = roomCode;
+            } else {
                 hideLoader();
-                showJoinRoom();
+                await loadUserRooms();
             }
-        } else {
-            hideLoader();
-            await loadUserRooms();
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
