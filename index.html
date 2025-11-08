@@ -97,6 +97,11 @@
             color: white;
         }
 
+        .btn-warning {
+            background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+            color: white;
+        }
+
         .input-group {
             margin-bottom: 20px;
         }
@@ -377,6 +382,15 @@
             font-family: monospace;
             font-size: 0.9em;
         }
+
+        .admin-badge {
+            background: #ffd700;
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -437,6 +451,11 @@
                 <div class="input-group">
                     <label>Дата обмена подарками</label>
                     <input type="date" id="roomDate">
+                </div>
+
+                <div class="input-group">
+                    <label>Место вручения подарков</label>
+                    <input type="text" id="roomLocation" placeholder="Офис, кафе или адрес">
                 </div>
 
                 <div class="input-group">
@@ -514,6 +533,9 @@
                 <button class="btn btn-success" id="startGameBtn" onclick="startGame()" style="margin-top: 20px;">
                     🎲 Начать игру
                 </button>
+                <button class="btn btn-warning hidden" id="transferAdminBtn" onclick="showTransferAdmin()">
+                    👑 Передать админку
+                </button>
                 <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">
                     Покинуть комнату
                 </button>
@@ -530,7 +552,9 @@
                     <div class="gift-icon">🎁</div>
                     <h2>Вы дарите подарок:</h2>
                     <div class="assignment-name" id="assignmentName"></div>
+                    <p id="assignmentUsername" style="font-size: 1.1em; margin-top: 10px;"></p>
                     <p style="margin-top: 20px; font-size: 1.1em;">Бюджет: <strong id="assignmentBudget"></strong></p>
+                    <p style="margin-top: 10px; font-size: 1em;">📍 Место: <span id="assignmentLocation"></span></p>
                 </div>
 
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0;">
@@ -548,30 +572,39 @@
                 </button>
             </div>
         </div>
+
+        <!-- Передача админки -->
+        <div id="transferAdminScreen" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Передать права администратора</h2>
+                
+                <div id="transferAdminList"></div>
+
+                <button class="btn btn-secondary" onclick="backToRoom()">
+                    Назад
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.MainButton.hide();
 
-        // Применяем тему Telegram
         document.body.style.background = tg.themeParams.bg_color || document.body.style.background;
 
-        // Глобальные переменные
         let currentRoomCode = null;
         let currentUserId = null;
         let currentUserName = '';
+        let currentUsername = '';
 
-        // API Base URL
         const API_URL = window.location.hostname === 'localhost'
             ? 'http://127.0.0.1:8002/api'
             : 'https://secretsantadrawprivate.onrender.com/api';
 
-        const BOT_USERNAME = 'SecretSantaDrawBot'; // Замените на имя вашего бота
+        const BOT_USERNAME = 'SecretSantaDrawBot';
 
-        // Добавьте эту функцию:
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('ru-RU', { 
@@ -581,28 +614,41 @@
             });
         }
 
-        // Инициализация
+        // УЛУЧШЕННАЯ инициализация с поддержкой deep links
         window.addEventListener('load', async () => {
-            // Получаем данные пользователя из Telegram
             const user = tg.initDataUnsafe?.user;
             if (user) {
                 currentUserId = user.id.toString();
                 currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                currentUsername = user.username || '';
                 
-                // Автозаполнение имени
                 document.getElementById('creatorName').value = currentUserName;
                 document.getElementById('joinName').value = currentUserName;
             } else {
                 currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
             }
 
-            // Проверяем start_param ИЛИ tgWebAppStartParam
-            const startParam = tg.initDataUnsafe?.start_param || 
-                            new URLSearchParams(window.location.hash.slice(1)).get('tgWebAppStartParam');
+            // ИСПРАВЛЕННАЯ логика обработки start_param
+            let startParam = null;
+            
+            // Способ 1: Через initDataUnsafe (работает при первом запуске бота)
+            if (tg.initDataUnsafe?.start_param) {
+                startParam = tg.initDataUnsafe.start_param;
+                console.log('Start param из initDataUnsafe:', startParam);
+            }
+            
+            // Способ 2: Через URL hash (работает при открытии Mini App)
+            const hashParams = new URLSearchParams(window.location.hash.slice(1));
+            const hashStartParam = hashParams.get('tgWebAppStartParam');
+            if (hashStartParam) {
+                startParam = hashStartParam;
+                console.log('Start param из URL hash:', startParam);
+            }
 
-            if (startParam) {
-                // Удаляем префикс join_ если есть
+            // Обрабатываем start_param
+            if (startParam && startParam.startsWith('join_')) {
                 const roomCode = startParam.replace('join_', '').toUpperCase();
+                console.log('Автозаполнение кода комнаты:', roomCode);
                 document.getElementById('joinCode').value = roomCode;
                 showJoinRoom();
             } else {
@@ -610,7 +656,6 @@
             }
         });
 
-        // Навигация между экранами
         function showScreen(screenId) {
             document.querySelectorAll('.container > div').forEach(el => {
                 if (el.classList.contains('header')) return;
@@ -627,7 +672,6 @@
 
         function showCreateRoom() {
             showScreen('createRoomScreen');
-            // Устанавливаем дату по умолчанию (через неделю)
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
             document.getElementById('roomDate').value = nextWeek.toISOString().split('T')[0];
@@ -642,7 +686,6 @@
             await displayUserRooms();
         }
 
-        // Загрузка комнат пользователя
         async function loadUserRooms() {
             try {
                 const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
@@ -650,7 +693,6 @@
                 
                 const data = await response.json();
                 
-                // Если есть активные комнаты, показываем главное меню
                 if (data.rooms && data.rooms.length > 0) {
                     showScreen('mainMenu');
                 } else {
@@ -662,7 +704,6 @@
             }
         }
 
-        // Отображение списка комнат
         async function displayUserRooms() {
             const roomsList = document.getElementById('roomsList');
             roomsList.innerHTML = '<div class="loading">Загрузка...</div>';
@@ -689,6 +730,7 @@
                         <h4>${room.name}</h4>
                         <p>👥 Участников: ${room.participant_count} • 💰 Бюджет: ${room.budget}₽</p>
                         <p>📅 ${formatDate(room.exchange_date)} • ${room.started ? '✅ Началась' : '⏳ Ожидание'}</p>
+                        ${room.exchange_location ? `<p>📍 ${room.exchange_location}</p>` : ''}
                         ${room.is_creator ? '<p style="color: #667eea; font-weight: 600;">👑 Вы создатель</p>' : ''}
                     </div>
                 `).join('');
@@ -698,17 +740,16 @@
             }
         }
 
-        // Открытие комнаты из списка
         async function openRoom(code) {
             currentRoomCode = code;
             await loadRoomFromAPI(code);
         }
 
-        // Создание комнаты
         async function createRoom() {
             const roomName = document.getElementById('roomName').value.trim();
             const budget = document.getElementById('roomBudget').value;
             const date = document.getElementById('roomDate').value;
+            const location = document.getElementById('roomLocation').value.trim();
             const creatorName = document.getElementById('creatorName').value.trim();
             const creatorWish = document.getElementById('creatorWish').value.trim();
 
@@ -721,10 +762,12 @@
                 name: roomName,
                 budget: parseInt(budget),
                 exchange_date: date,
+                exchange_location: location || null,
                 creator: {
                     name: creatorName,
                     wish: creatorWish,
-                    telegram_id: currentUserId
+                    telegram_id: currentUserId,
+                    telegram_username: currentUsername
                 }
             };
 
@@ -738,7 +781,6 @@
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
                     throw new Error(`Ошибка при создании комнаты: ${response.status}`);
                 }
 
@@ -753,7 +795,6 @@
             }
         }
 
-        // Присоединение к комнате
         async function joinRoom() {
             const code = document.getElementById('joinCode').value.trim().toUpperCase();
             const name = document.getElementById('joinName').value.trim();
@@ -775,7 +816,8 @@
                         participant: {
                             name: name,
                             wish: wish,
-                            telegram_id: currentUserId
+                            telegram_id: currentUserId,
+                            telegram_username: currentUsername
                         }
                     })
                 });
@@ -794,7 +836,6 @@
             }
         }
 
-        // Загрузка комнаты из API
         async function loadRoomFromAPI(code) {
             try {
                 const response = await fetch(`${API_URL}/rooms/${code}?telegram_id=${currentUserId}`);
@@ -807,7 +848,6 @@
                 displayRoom(code, room);
                 showScreen('roomScreen');
                 
-                // Если игра уже началась, загружаем назначение
                 if (room.started) {
                     await loadAssignment(code);
                 }
@@ -817,11 +857,13 @@
             }
         }
 
-        // Отображение комнаты
         function displayRoom(code, room) {
             document.getElementById('roomTitle').textContent = room.name;
-            document.getElementById('roomInfo').textContent = 
-                `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
+            let infoText = `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
+            if (room.exchange_location) {
+                infoText += `\n📍 ${room.exchange_location}`;
+            }
+            document.getElementById('roomInfo').textContent = infoText;
             document.getElementById('displayCode').textContent = code;
 
             const participants = room.participants || [];
@@ -836,7 +878,10 @@
                     <div class="participant">
                         <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
                         <div class="participant-info">
-                            <div class="participant-name">${p.name}</div>
+                            <div class="participant-name">
+                                ${p.name}
+                                ${p.telegram_username ? `<span style="color: #888;">(@${p.telegram_username})</span>` : ''}
+                            </div>
                             <div class="participant-wish">${p.wish || 'Без пожеланий'}</div>
                         </div>
                         ${room.is_creator && p.telegram_id !== currentUserId && !room.started ? `
@@ -858,12 +903,13 @@
                 `;
             }
 
-            // Показываем кнопку старта только создателю
             const startBtn = document.getElementById('startGameBtn');
+            const transferBtn = document.getElementById('transferAdminBtn');
             const leaveBtn = document.getElementById('leaveRoomBtn');
             
             if (room.is_creator) {
                 startBtn.classList.remove('hidden');
+                transferBtn.classList.remove('hidden');
                 startBtn.disabled = participantCount < 3 || room.started;
                 if (room.started) {
                     startBtn.textContent = '✅ Игра началась';
@@ -875,6 +921,7 @@
                 leaveBtn.classList.add('hidden');
             } else {
                 startBtn.classList.add('hidden');
+                transferBtn.classList.add('hidden');
                 if (!room.started) {
                     leaveBtn.classList.remove('hidden');
                 } else {
@@ -883,7 +930,6 @@
             }
         }
 
-        // Начало игры
         async function startGame() {
             if (!currentRoomCode) return;
 
@@ -909,7 +955,6 @@
             }
         }
 
-        // Загрузка назначения из API
         async function loadAssignment(code) {
             try {
                 const response = await fetch(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
@@ -919,27 +964,32 @@
                 }
                 
                 const assignment = await response.json();
-                showAssignment({
-                    name: assignment.receiver_name,
-                    wish: assignment.receiver_wish
-                }, assignment.budget);
+                showAssignment(assignment);
             } catch (error) {
                 console.error('Error:', error);
                 tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
             }
         }
 
-        // Отображение назначения
-        function showAssignment(receiver, budget) {
-            document.getElementById('assignmentName').textContent = receiver.name;
-            document.getElementById('assignmentBudget').textContent = `${budget}₽`;
+        function showAssignment(assignment) {
+            document.getElementById('assignmentName').textContent = assignment.receiver_name;
+            
+            const usernameEl = document.getElementById('assignmentUsername');
+            if (assignment.receiver_username) {
+                usernameEl.textContent = `@${assignment.receiver_username}`;
+                usernameEl.style.display = 'block';
+            } else {
+                usernameEl.style.display = 'none';
+            }
+            
+            document.getElementById('assignmentBudget').textContent = `${assignment.budget}₽`;
+            document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточняется';
             document.getElementById('assignmentWish').textContent = 
-                receiver.wish || 'Участник не указал пожелания';
+                assignment.receiver_wish || 'Участник не указал пожелания';
             
             showScreen('assignmentScreen');
         }
 
-        // Покинуть комнату
         async function leaveRoom() {
             if (!currentRoomCode) return;
 
@@ -965,7 +1015,6 @@
             }
         }
 
-        // Удалить участника (только для создателя)
         async function removeParticipant(participantId) {
             if (!currentRoomCode) return;
 
@@ -992,7 +1041,6 @@
             }
         }
 
-        // Копирование кода комнаты
         function copyRoomCode() {
             const code = document.getElementById('displayCode').textContent;
             
@@ -1023,15 +1071,14 @@
             document.body.removeChild(textarea);
         }
 
-        // Поделиться комнатой
         function shareRoom() {
             if (!currentRoomCode) return;
             
-            // Создаем deep link
+            // Создаем deep link с правильным форматом
             const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
             const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
             
-            // Используем Telegram Share (ссылка будет одна)
+            // Используем Telegram Share API
             if (tg.openTelegramLink) {
                 const encodedText = encodeURIComponent(shareText);
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
@@ -1048,7 +1095,82 @@
             }
         }
 
+        // НОВОЕ: Передача админки
+        async function showTransferAdmin() {
+            if (!currentRoomCode) return;
+
+            try {
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}?telegram_id=${currentUserId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнаты');
+                
+                const room = await response.json();
+                const participants = room.participants.filter(p => p.telegram_id !== currentUserId);
+                
+                if (participants.length === 0) {
+                    tg.showAlert('Нет других участников для передачи прав');
+                    return;
+                }
+
+                const listHtml = participants.map(p => `
+                    <div class="participant" style="margin-bottom: 10px;">
+                        <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">${p.name}</div>
+                        </div>
+                        <button class="btn btn-warning" style="width: auto; padding: 8px 16px; margin: 0;" 
+                                onclick="transferAdminTo('${p.telegram_id}', '${p.name}')">
+                            Передать
+                        </button>
+                    </div>
+                `).join('');
+
+                document.getElementById('transferAdminList').innerHTML = listHtml;
+                showScreen('transferAdminScreen');
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert('Ошибка загрузки участников');
+            }
+        }
+
+        async function transferAdminTo(newAdminId, newAdminName) {
+            if (!confirm(`Передать права администратора пользователю ${newAdminName}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/rooms/${currentRoomCode}/transfer-admin?current_admin_id=${currentUserId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            new_admin_telegram_id: newAdminId
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка передачи прав');
+                }
+
+                tg.showAlert('Права администратора переданы!');
+                await loadRoomFromAPI(currentRoomCode);
+            } catch (error) {
+                console.error('Error:', error);
+                tg.showAlert(error.message || 'Ошибка передачи прав');
+            }
+        }
+
+        async function backToRoom() {
+            if (currentRoomCode) {
+                await loadRoomFromAPI(currentRoomCode);
+            } else {
+                showMainMenu();
+            }
+        }
     </script>
 </body>
 </html>
-
