@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тайный Санта</title>
+    <title>Тайный Санта 🎅</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -26,6 +26,7 @@
         }
 
         :root {
+            /* Темная тема (по умолчанию) */
             --bg-primary: linear-gradient(180deg, #1a5f4e 0%, #0d3d2f 100%);
             --bg-card: rgba(255, 255, 255, 0.1);
             --bg-card-hover: rgba(255, 255, 255, 0.15);
@@ -62,6 +63,7 @@
             transition: background 0.3s ease;
         }
 
+        /* Лоадер */
         .loader-overlay {
             position: fixed;
             top: 0;
@@ -108,6 +110,7 @@
             text-align: center;
         }
 
+        /* Декоративные элементы фона */
         .bg-decorations {
             position: fixed;
             top: 0;
@@ -147,6 +150,7 @@
             padding: 24px 20px 100px;
         }
 
+        /* Переключатель темы */
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -171,6 +175,7 @@
             background: var(--bg-card-hover);
         }
 
+        /* Кнопка назад */
         .back-button {
             position: fixed;
             top: 20px;
@@ -195,6 +200,7 @@
             background: var(--bg-card-hover);
         }
 
+        /* Хедер */
         .header {
             text-align: center;
             margin-bottom: 32px;
@@ -229,6 +235,7 @@
             font-weight: 400;
         }
 
+        /* Карточки действий */
         .action-cards {
             display: flex;
             flex-direction: column;
@@ -328,15 +335,16 @@
             transform: translateX(4px);
         }
 
+        /* Информационная карточка */
         .info-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
-            margin-bottom: 20px;
-        }
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
+        margin-bottom: 20px; /* Добавьте эту строку */
+    }
 
         .info-card h4 {
             font-size: 16px;
@@ -361,18 +369,19 @@
             margin-bottom: 8px;
         }
 
-        .info-card li:before {
-            content: "•";
+        .info-card li::before {
+            content: '✓';
             position: absolute;
             left: 0;
             color: #4facfe;
             font-weight: 700;
         }
 
+        /* Формы ввода */
         .input-group {
             margin-bottom: 20px;
             animation: fadeSlideUp 0.6s ease-out backwards;
-            overflow: hidden;
+            overflow: hidden; /* Добавьте эту строку */
         }
 
         .input-group:nth-child(2) { animation-delay: 0.1s; }
@@ -390,8 +399,8 @@
         .input-group input,
         .input-group textarea {
             width: 100%;
-            max-width: 100%;
-            min-width: 0;
+            max-width: 100%; /* Добавлено */
+            min-width: 0; /* Добавлено */
             padding: 16px;
             background: var(--input-bg);
             backdrop-filter: blur(20px);
@@ -401,9 +410,10 @@
             color: var(--text-primary);
             transition: all 0.3s ease;
             font-family: inherit;
-            box-sizing: border-box;
+            box-sizing: border-box; /* Убедитесь что это есть */
         }
 
+        /* Специальное правило именно для поля даты */
         .input-group input[type="date"] {
             width: 100% !important;
             max-width: 100% !important;
@@ -414,30 +424,32 @@
             appearance: none;
             overflow: hidden;
             text-overflow: ellipsis;
-            -webkit-touch-callout: none;
         }
 
-        .input-group input[type="date"] {
-            display: block;
-            width: calc(100% - 2px) !important;
-        }
-
-        .input-group input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-            width: 100%;
-        }
-
-        .input-group input[type="date"]::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
+        /* Дополнительно для iOS Safari */
+        @supports (-webkit-touch-callout: none) {
+            .input-group input[type="date"] {
+                display: block;
+                width: calc(100% - 2px) !important;
+            }
+            
+            .input-group input[type="date"]::-webkit-date-and-time-value {
+                text-align: left;
+                width: 100%;
+            }
+            
+            .input-group input[type="date"]::-webkit-calendar-picker-indicator {
+                background: transparent;
+                bottom: 0;
+                color: transparent;
+                cursor: pointer;
+                height: auto;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+            }
         }
 
         .input-group input::placeholder,
@@ -458,6 +470,7 @@
             min-height: 100px;
         }
 
+        /* Кнопки */
         .btn {
             width: 100%;
             padding: 18px;
@@ -524,6 +537,7 @@
             transform: translateY(0);
         }
 
+        /* Код комнаты */
         .room-code {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -568,6 +582,7 @@
             transform: scale(1.05);
         }
 
+        /* Участники */
         .participants {
             margin-top: 24px;
             animation: fadeSlideUp 0.6s ease-out 0.3s backwards;
@@ -609,13 +624,6 @@
             font-size: 18px;
             margin-right: 16px;
             flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .participant-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .participant-info {
@@ -626,18 +634,6 @@
             font-weight: 600;
             margin-bottom: 4px;
             color: var(--text-primary);
-        }
-
-        .participant-username {
-            color: var(--text-tertiary);
-            font-size: 14px;
-            text-decoration: none;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-
-        .participant-username:hover {
-            text-decoration: underline;
         }
 
         .participant-wish {
@@ -667,6 +663,7 @@
             transform: scale(1.05);
         }
 
+        /* Карточка назначения */
         .assignment-card {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -689,51 +686,11 @@
             font-size: 24px;
         }
 
-        .assignment-receiver {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 24px 0;
-        }
-
-        .assignment-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-        }
-
-        .assignment-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .assignment-name {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin: 24px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .assignment-username {
-            font-size: 16px;
-            opacity: 0.9;
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-        }
-
-        .assignment-username:hover {
-            text-decoration: underline;
         }
 
         .wish-box {
@@ -757,6 +714,7 @@
             line-height: 1.6;
         }
 
+        /* Список комнат */
         .room-list-item {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -810,6 +768,7 @@
             color: #4caf50;
         }
 
+        /* Пустое состояние */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -822,6 +781,7 @@
             opacity: 0.5;
         }
 
+        /* Сообщения об ошибках/успехе */
         .error {
             background: rgba(220, 53, 69, 0.2);
             color: #dc3545;
@@ -840,10 +800,12 @@
             border: 1px solid rgba(76, 175, 80, 0.3);
         }
 
+        /* Скрытие элементов */
         .hidden {
             display: none !important;
         }
 
+        /* Анимации */
         @keyframes fadeSlideDown {
             from {
                 opacity: 0;
@@ -866,6 +828,7 @@
             }
         }
 
+        /* Адаптивность */
         @media (max-width: 380px) {
             .container {
                 padding: 20px 16px 80px;
@@ -888,7 +851,7 @@
     </style>
 </head>
 <body>
-    <!-- Loader -->
+    <!-- Лоадер -->
     <div class="loader-overlay" id="loader">
         <div>
             <div class="loader"></div>
@@ -896,17 +859,17 @@
         </div>
     </div>
 
-    <!-- Background decorations -->
+    <!-- Декоративные элементы -->
     <div class="bg-decorations" id="decorations"></div>
 
-    <!-- Theme toggle -->
+    <!-- Переключатель темы -->
     <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</div>
 
-    <!-- Back button -->
+    <!-- Кнопка назад -->
     <div class="back-button hidden" id="backButton" onclick="goBack()">←</div>
 
     <div class="container">
-        <!-- Main Menu -->
+        <!-- ========== ГЛАВНОЕ МЕНЮ ========== -->
         <div id="mainMenu" class="hidden">
             <div class="header">
                 <div class="header-icon">🎅</div>
@@ -961,22 +924,22 @@
             </div>
         </div>
 
-        <!-- Create Room Screen -->
+        <!-- ========== СОЗДАНИЕ КОМНАТЫ ========== -->
         <div id="createRoomScreen" class="hidden">
             <div class="header">
                 <div class="header-icon">🎁</div>
-                <h1>Создать комнату</h1>
-                <p>Настрой параметры игры</p>
+                <h1>Создание комнаты</h1>
+                <p>Заполни информацию об игре</p>
             </div>
 
             <div class="input-group">
-                <label>Название комнаты</label>
-                <input type="text" id="roomName" placeholder="Например: Новый Год 2025">
+                <label>Название игры</label>
+                <input type="text" id="roomName" placeholder="Новогодняя вечеринка 2025">
             </div>
 
             <div class="input-group">
-                <label>Бюджет подарка (₽)</label>
-                <input type="number" id="roomBudget" placeholder="Например: 1000">
+                <label>Максимальный бюджет (₽)</label>
+                <input type="number" id="roomBudget" placeholder="1000">
             </div>
 
             <div class="input-group">
@@ -985,30 +948,34 @@
             </div>
 
             <div class="input-group">
-                <label>Место встречи</label>
-                <input type="text" id="roomLocation" placeholder="Например, кафе на площади">
+                <label>Место вручения подарков</label>
+                <input type="text" id="roomLocation" placeholder="Офис, кафе или адрес">
             </div>
 
             <div class="input-group">
-                <label>Твоё имя</label>
-                <input type="text" id="creatorName" placeholder="Введи своё имя">
+                <label>Ваше имя</label>
+                <input type="text" id="creatorName" placeholder="Иван">
             </div>
 
             <div class="input-group">
-                <label>Твои пожелания</label>
-                <textarea id="creatorWish" placeholder="Что ты хотел бы получить?"></textarea>
+                <label>Ваши пожелания к подарку</label>
+                <textarea id="creatorWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
             </div>
 
-            <button class="btn btn-primary" onclick="createRoom()">🎉 Создать комнату</button>
-            <button class="btn btn-secondary" onclick="showMainMenu()">Назад</button>
+            <button class="btn btn-primary" onclick="createRoom()">
+                🎄 Создать комнату
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                Назад
+            </button>
         </div>
 
-        <!-- Join Room Screen -->
+        <!-- ========== ПРИСОЕДИНЕНИЕ К КОМНАТЕ ========== -->
         <div id="joinRoomScreen" class="hidden">
             <div class="header">
                 <div class="header-icon">🚪</div>
                 <h1>Присоединиться</h1>
-                <p>Введи код комнаты от создателя</p>
+                <p>Введи код комнаты от организатора</p>
             </div>
 
             <div class="input-group">
@@ -1017,33 +984,39 @@
             </div>
 
             <div class="input-group">
-                <label>Твоё имя</label>
-                <input type="text" id="joinName" placeholder="Введи своё имя">
+                <label>Ваше имя</label>
+                <input type="text" id="joinName" placeholder="Иван">
             </div>
 
             <div class="input-group">
-                <label>Твои пожелания</label>
-                <textarea id="joinWish" placeholder="Что ты хотел бы получить?"></textarea>
+                <label>Ваши пожелания к подарку</label>
+                <textarea id="joinWish" placeholder="Люблю книги, кофе и уютные вещи..."></textarea>
             </div>
 
-            <button class="btn btn-primary" onclick="joinRoom()">✨ Присоединиться</button>
-            <button class="btn btn-secondary" onclick="showMainMenu()">Назад</button>
+            <button class="btn btn-primary" onclick="joinRoom()">
+                ✨ Присоединиться
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                Назад
+            </button>
         </div>
 
-        <!-- My Rooms Screen -->
+        <!-- ========== МОИ КОМНАТЫ ========== -->
         <div id="myRoomsScreen" class="hidden">
             <div class="header">
                 <div class="header-icon">📋</div>
                 <h1>Мои комнаты</h1>
-                <p>Твои активные игры</p>
+                <p>Все твои активные игры</p>
             </div>
 
             <div id="roomsList"></div>
 
-            <button class="btn btn-secondary" onclick="showMainMenu()">Назад</button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
         </div>
 
-        <!-- Room Screen -->
+        <!-- ========== ПРОСМОТР КОМНАТЫ ========== -->
         <div id="roomScreen" class="hidden">
             <div class="header">
                 <div class="header-icon">🎄</div>
@@ -1052,58 +1025,66 @@
             </div>
 
             <div class="room-code">
-                <h3>Код комнаты</h3>
+                <h3>Код комнаты:</h3>
                 <div class="code" id="displayCode"></div>
-                <button class="copy-button" onclick="copyRoomCode()">📋 Скопировать код</button>
-                <button class="copy-button" onclick="shareRoom()">📤 Поделиться</button>
+                <button class="copy-button" onclick="copyRoomCode()">
+                    📋 Копировать код
+                </button>
+                <button class="copy-button" onclick="shareRoom()">
+                    🔗 Поделиться ссылкой
+                </button>
             </div>
 
             <div class="participants">
-                <h3>Участники <span id="participantCount" class="status-badge status-waiting">0</span></h3>
+                <h3>👥 Участники <span id="participantCount" class="status-badge status-waiting">0</span></h3>
                 <div id="participantsList"></div>
             </div>
 
-            <button class="btn btn-success" id="startGameBtn" onclick="startGame()">🎲 Начать розыгрыш</button>
-            <button class="btn btn-warning hidden" id="transferAdminBtn" onclick="showTransferAdmin()">👑 Передать права</button>
-            <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">🚪 Покинуть комнату</button>
-            <button class="btn btn-secondary" onclick="showMainMenu()">Назад</button>
+            <button class="btn btn-success" id="startGameBtn" onclick="startGame()">
+                🎲 Начать игру
+            </button>
+            <button class="btn btn-warning hidden" id="transferAdminBtn" onclick="showTransferAdmin()">
+                👑 Передать админку
+            </button>
+            <button class="btn btn-danger" id="leaveRoomBtn" onclick="leaveRoom()">
+                Покинуть комнату
+            </button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
         </div>
 
-        <!-- Assignment Screen -->
+        <!-- ========== НАЗНАЧЕНИЕ (КТО ПОЛУЧАТЕЛЬ) ========== -->
         <div id="assignmentScreen" class="hidden">
             <div class="assignment-card">
                 <div class="gift-icon">🎁</div>
                 <h2>Ты даришь подарок:</h2>
-                
-                <div class="assignment-receiver">
-                    <div class="assignment-avatar" id="assignmentAvatar"></div>
-                    <div class="assignment-name" id="assignmentName"></div>
-                    <a class="assignment-username" id="assignmentUsername" target="_blank"></a>
-                </div>
-
-                <p style="margin-top: 20px; font-size: 18px;">Бюджет: <strong id="assignmentBudget"></strong></p>
-                <p style="margin-top: 10px; font-size: 15px;">Место: <span id="assignmentLocation"></span></p>
+                <div class="assignment-name" id="assignmentName"></div>
+                <p id="assignmentUsername" style="font-size: 16px; margin-top: 10px;"></p>
+                <p style="margin-top: 20px; font-size: 18px;">💰 Бюджет: <strong id="assignmentBudget"></strong></p>
+                <p style="margin-top: 10px; font-size: 15px;">📍 <span id="assignmentLocation"></span></p>
             </div>
 
             <div class="wish-box">
-                <h3>🎯 Пожелания получателя:</h3>
+                <h3>💭 Пожелания:</h3>
                 <p id="assignmentWish"></p>
             </div>
 
             <div class="info-card">
-                <h4>💡 Что дальше?</h4>
+                <h4>⚠️ Важно!</h4>
                 <ul>
-                    <li>Подбери подарок в рамках бюджета</li>
-                    <li>Учти пожелания получателя</li>
-                    <li>Приди на встречу в указанное время</li>
-                    <li>Обменяйтесь подарками и создайте праздничное настроение!</li>
+                    <li>Сохраните это в тайне до момента обмена</li>
+                    <li>Подготовьте подарок в рамках бюджета</li>
+                    <li>Придите вовремя на встречу обмена</li>
                 </ul>
             </div>
 
-            <button class="btn btn-secondary" onclick="showMainMenu()">На главную</button>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                На главную
+            </button>
         </div>
 
-        <!-- Transfer Admin Screen -->
+        <!-- ========== ПЕРЕДАЧА АДМИНКИ ========== -->
         <div id="transferAdminScreen" class="hidden">
             <div class="header">
                 <div class="header-icon">👑</div>
@@ -1113,28 +1094,30 @@
 
             <div id="transferAdminList"></div>
 
-            <button class="btn btn-secondary" onclick="backToRoom()">Назад</button>
+            <button class="btn btn-secondary" onclick="backToRoom()">
+                Назад
+            </button>
         </div>
     </div>
 
     <script>
-        // TELEGRAM WEBAPP
+        // ============= TELEGRAM WEBAPP =============
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.MainButton.hide();
 
         let currentRoomCode = null;
         let currentUserId = null;
-        let currentUserName;
-        let currentUsername;
+        let currentUserName = '';
+        let currentUsername = '';
 
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://127.0.0.1:8002/api/'
-            : 'https://secretsantadrawprivate.onrender.com/api/';
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://127.0.0.1:8002/api'
+            : 'https://secretsantadrawprivate.onrender.com/api';
 
         const BOT_USERNAME = 'SecretSantaDrawBot';
 
-        // LOADER
+        // ============= LOADER =============
         function showLoader(text = 'Загрузка...') {
             const loader = document.getElementById('loader');
             const loaderText = loader.querySelector('.loader-text');
@@ -1147,35 +1130,35 @@
             loader.classList.remove('active');
         }
 
-        // THEME
+        // ============= THEME =============
         let themeMode = 'auto'; // 'auto', 'light', 'dark'
 
         function applyTheme(mode) {
             const body = document.body;
             const toggle = document.getElementById('themeToggle');
-
+            
             if (mode === 'auto') {
-                // Telegram
+                // Применяем тему из Telegram
                 if (tg.colorScheme === 'dark') {
                     body.classList.remove('light-theme');
                 } else {
                     body.classList.add('light-theme');
                 }
                 toggle.textContent = '🌓';
-                toggle.title = 'Авто';
+                toggle.title = 'Авто (как в системе)';
             } else if (mode === 'light') {
                 body.classList.add('light-theme');
                 toggle.textContent = '☀️';
-                toggle.title = 'Светлая';
+                toggle.title = 'Светлая тема';
             } else if (mode === 'dark') {
                 body.classList.remove('light-theme');
                 toggle.textContent = '🌙';
-                toggle.title = 'Тёмная';
+                toggle.title = 'Тёмная тема';
             }
         }
 
         function toggleTheme() {
-            // auto -> light -> dark -> auto
+            // Цикл: auto -> light -> dark -> auto
             if (themeMode === 'auto') {
                 themeMode = 'light';
             } else if (themeMode === 'light') {
@@ -1183,24 +1166,27 @@
             } else {
                 themeMode = 'auto';
             }
+            
             applyTheme(themeMode);
             localStorage.setItem('themeMode', themeMode);
         }
 
         function loadSavedTheme() {
             const savedTheme = localStorage.getItem('themeMode');
+            
             if (savedTheme && ['auto', 'light', 'dark'].includes(savedTheme)) {
                 themeMode = savedTheme;
             } else {
                 themeMode = 'auto';
             }
+            
             applyTheme(themeMode);
         }
 
-        // SNOWFLAKES
+        // ============= SNOWFLAKES =============
         function createSnowflakes() {
             const decorations = document.getElementById('decorations');
-            const snowflakes = ['❄', '❅', '❆', '✦', '✧'];
+            const snowflakes = ['❄', '❅', '❆', '✻', '✼'];
             
             for (let i = 0; i < 15; i++) {
                 const snowflake = document.createElement('div');
@@ -1214,14 +1200,15 @@
             }
         }
 
-        // NAVIGATION
+        // ============= NAVIGATION =============
         function showScreen(screenId) {
             document.querySelectorAll('.container > div').forEach(el => {
                 if (!el.id) return;
                 el.classList.add('hidden');
             });
-            document.getElementById(screenId).classList.remove('hidden');
 
+            document.getElementById(screenId).classList.remove('hidden');
+            
             const backButton = document.getElementById('backButton');
             if (screenId === 'mainMenu') {
                 backButton.classList.add('hidden');
@@ -1258,44 +1245,24 @@
             await displayUserRooms();
         }
 
-        // UTILITY
+        // ============= UTILITY =============
         function formatDate(dateStr) {
             const date = new Date(dateStr);
-            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+            return date.toLocaleDateString('ru-RU', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
         }
 
-        function getUserPhotoUrl(telegramId) {
-            if (!telegramId || telegramId === 'demo') return null;
-            return `https://t.me/i/userpic/320/${telegramId}.jpg`;
-        }
-
-        function createAvatarElement(name, photoUrl) {
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = 'participant-avatar';
-            
-            if (photoUrl) {
-                const img = document.createElement('img');
-                img.src = photoUrl;
-                img.alt = name;
-                img.onerror = function() {
-                    // Если фото не загрузилось, показываем букву
-                    avatarDiv.innerHTML = name.charAt(0).toUpperCase();
-                };
-                avatarDiv.appendChild(img);
-            } else {
-                avatarDiv.textContent = name.charAt(0).toUpperCase();
-            }
-            
-            return avatarDiv;
-        }
-
-        // API FUNCTIONS
+        // ============= API FUNCTIONS =============
         async function loadUserRooms() {
             try {
-                const response = await fetch(`${API_URL}user/${currentUserId}/rooms`);
-                if (!response.ok) throw new Error();
+                const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнат');
                 
                 const data = await response.json();
+                
                 if (data.rooms && data.rooms.length > 0) {
                     showScreen('mainMenu');
                 } else {
@@ -1311,33 +1278,34 @@
             const roomsList = document.getElementById('roomsList');
             roomsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Загрузка...</div>';
             
-            showLoader('Загружаем комнаты...');
+            showLoader('Загрузка комнат...');
+            
             try {
-                const response = await fetch(`${API_URL}user/${currentUserId}/rooms`);
-                if (!response.ok) throw new Error();
+                const response = await fetch(`${API_URL}/user/${currentUserId}/rooms`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнат');
                 
                 const data = await response.json();
+                
                 hideLoader();
-
+                
                 if (!data.rooms || data.rooms.length === 0) {
                     roomsList.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">🎄</div>
-                            <h3>Пока нет комнат</h3>
-                            <p>Создай новую или присоединись к существующей!</p>
+                            <h3>У вас пока нет комнат</h3>
+                            <p>Создайте новую или присоединитесь к существующей!</p>
                         </div>
                     `;
                     return;
                 }
-
+                
                 roomsList.innerHTML = data.rooms.map(room => `
                     <div class="room-list-item" onclick="openRoom('${room.code}')">
                         <h4>${room.name}</h4>
-                        <p>👥 ${room.participantcount} участников • 💰 ${room.budget}₽</p>
-                        <p>📅 ${formatDate(room.exchangedate)}</p>
-                        ${room.started ? '<p class="status-badge status-ready">Розыгрыш завершён</p>' : ''}
-                        ${room.exchangelocation ? `<p>📍 ${room.exchangelocation}</p>` : ''}
-                        ${room.iscreator ? '<p style="color: #667eea; font-weight: 600;">👑 Создатель</p>' : ''}
+                        <p>👥 Участников: ${room.participant_count} • 💰 Бюджет: ${room.budget}₽</p>
+                        <p>📅 ${formatDate(room.exchange_date)} • ${room.started ? '✅ Началась' : '⏳ Ожидание'}</p>
+                        ${room.exchange_location ? `<p>📍 ${room.exchange_location}</p>` : ''}
+                        ${room.is_creator ? '<p style="color: #667eea; font-weight: 600;">👑 Вы создатель</p>' : ''}
                     </div>
                 `).join('');
             } catch (error) {
@@ -1361,38 +1329,45 @@
             const creatorWish = document.getElementById('creatorWish').value.trim();
 
             if (!roomName || !budget || !date || !creatorName) {
-                tg.showAlert('Заполни все обязательные поля!');
+                tg.showAlert('Пожалуйста, заполните все обязательные поля');
                 return;
             }
 
             const roomData = {
                 name: roomName,
                 budget: parseInt(budget),
-                exchangedate: date,
-                exchangelocation: location || null,
+                exchange_date: date,
+                exchange_location: location || null,
                 creator: {
                     name: creatorName,
                     wish: creatorWish,
-                    telegramid: currentUserId,
-                    telegramusername: currentUsername
+                    telegram_id: currentUserId,
+                    telegram_username: currentUsername
                 }
             };
 
-            showLoader('Создаём комнату...');
+            showLoader('Создание комнаты...');
+
             try {
-                const response = await fetch(`${API_URL}rooms/create`, {
+                const response = await fetch(`${API_URL}/rooms/create`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify(roomData)
                 });
 
-                if (!response.ok) throw new Error(response.status);
+                if (!response.ok) {
+                    throw new Error(`Ошибка при создании комнаты: ${response.status}`);
+                }
 
                 const result = await response.json();
                 currentRoomCode = result.code;
+
                 hideLoader();
+
                 await loadRoomFromAPI(result.code);
-                tg.showAlert('Комната создана! Поделись кодом с друзьями.');
+                tg.showAlert('Комната создана! Поделитесь кодом с друзьями.');
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
@@ -1406,121 +1381,111 @@
             const wish = document.getElementById('joinWish').value.trim();
 
             if (!code || !name) {
-                tg.showAlert('Заполни все обязательные поля!');
+                tg.showAlert('Пожалуйста, заполните все поля');
                 return;
             }
 
-            showLoader('Присоединяемся...');
+            showLoader('Присоединение...');
+
             try {
-                const response = await fetch(`${API_URL}rooms/join`, {
+                const response = await fetch(`${API_URL}/rooms/join`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({
                         code: code,
                         participant: {
                             name: name,
                             wish: wish,
-                            telegramid: currentUserId,
-                            telegramusername: currentUsername
+                            telegram_id: currentUserId,
+                            telegram_username: currentUsername
                         }
                     })
                 });
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail);
+                    throw new Error(error.detail || 'Ошибка при присоединении');
                 }
 
                 currentRoomCode = code;
                 hideLoader();
                 await loadRoomFromAPI(code);
-                tg.showAlert('Ты успешно присоединился к комнате!');
+                tg.showAlert('Вы успешно присоединились!');
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert(error.message);
+                tg.showAlert(error.message || 'Ошибка при присоединении к комнате');
             }
         }
 
         async function loadRoomFromAPI(code) {
-            showLoader('Загружаем комнату...');
-            try {
-                const response = await fetch(`${API_URL}rooms/${code}?telegramid=${currentUserId}`);
-                if (!response.ok) throw new Error();
+            showLoader('Загрузка комнаты...');
 
+            try {
+                const response = await fetch(`${API_URL}/rooms/${code}?telegram_id=${currentUserId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Комната не найдена');
+                }
+                
                 const room = await response.json();
                 hideLoader();
                 displayRoom(code, room);
                 showScreen('roomScreen');
-
+                
                 if (room.started) {
                     await loadAssignment(code);
                 }
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert('Ошибка загрузки комнаты: ' + error.message);
+                tg.showAlert('Ошибка при загрузке комнаты: ' + error.message);
             }
         }
 
         function displayRoom(code, room) {
             document.getElementById('roomTitle').textContent = room.name;
-            
-            let infoText = `💰 ${room.budget}₽ • 📅 ${formatDate(room.exchangedate)}`;
-            if (room.exchangelocation) {
-                infoText += ` • 📍 ${room.exchangelocation}`;
+            let infoText = `Бюджет: ${room.budget}₽ • Дата обмена: ${formatDate(room.exchange_date)}`;
+            if (room.exchange_location) {
+                infoText += `\n📍 ${room.exchange_location}`;
             }
             document.getElementById('roomInfo').textContent = infoText;
             document.getElementById('displayCode').textContent = code;
 
-            const participants = room.participants;
-            const participantCount = room.participantcount || participants.length;
+            const participants = room.participants || [];
+            const participantCount = room.participant_count || participants.length;
+            
             document.getElementById('participantCount').textContent = participantCount;
-
+            
             const participantsList = document.getElementById('participantsList');
+            
             if (participants.length > 0) {
-                participantsList.innerHTML = participants.map(p => {
-                    const photoUrl = getUserPhotoUrl(p.telegramid);
-                    const usernameLink = p.telegramusername 
-                        ? `<a href="https://t.me/${p.telegramusername}" target="_blank" class="participant-username">@${p.telegramusername}</a>`
-                        : '';
-                    
-                    let avatarHtml = '';
-                    if (photoUrl) {
-                        avatarHtml = `
-                            <div class="participant-avatar">
-                                <img src="${photoUrl}" alt="${p.name}" onerror="this.parentElement.innerHTML='${p.name.charAt(0).toUpperCase()}'">
+                participantsList.innerHTML = participants.map(p => `
+                    <div class="participant">
+                        <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">
+                                ${p.name}
+                                ${p.telegram_username ? `<span style="color: var(--text-tertiary);">(@${p.telegram_username})</span>` : ''}
                             </div>
-                        `;
-                    } else {
-                        avatarHtml = `
-                            <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
-                        `;
-                    }
-
-                    return `
-                        <div class="participant">
-                            ${avatarHtml}
-                            <div class="participant-info">
-                                <div class="participant-name">
-                                    ${p.name}
-                                    ${usernameLink}
-                                </div>
-                                ${p.wish ? `<div class="participant-wish">${p.wish}</div>` : ''}
-                            </div>
-                            ${room.iscreator && p.telegramid !== currentUserId && !room.started ? `
-                                <div class="participant-actions">
-                                    <button class="remove-btn" onclick="removeParticipant('${p.telegramid}')">Удалить</button>
-                                </div>
-                            ` : ''}
+                            ${p.wish ? `<div class="participant-wish">${p.wish}</div>` : ''}
                         </div>
-                    `;
-                }).join('');
+                        ${room.is_creator && p.telegram_id !== currentUserId && !room.started ? `
+                            <div class="participant-actions">
+                                <button class="remove-btn" onclick="removeParticipant('${p.telegram_id}')">
+                                    Удалить
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
             } else {
                 participantsList.innerHTML = `
                     <div class="participant">
                         <div class="participant-info">
-                            <div class="participant-name">Пока никого нет</div>
+                            <div class="participant-name">Загрузка участников...</div>
                         </div>
                     </div>
                 `;
@@ -1529,25 +1494,22 @@
             const startBtn = document.getElementById('startGameBtn');
             const transferBtn = document.getElementById('transferAdminBtn');
             const leaveBtn = document.getElementById('leaveRoomBtn');
-
-            if (room.iscreator) {
+            
+            if (room.is_creator) {
                 startBtn.classList.remove('hidden');
                 transferBtn.classList.remove('hidden');
                 startBtn.disabled = participantCount < 3 || room.started;
-
                 if (room.started) {
-                    startBtn.textContent = '✅ Розыгрыш завершён';
+                    startBtn.textContent = '✅ Игра началась';
                 } else if (participantCount < 3) {
-                    startBtn.textContent = `⏳ Нужно минимум 3 участника (сейчас ${participantCount})`;
+                    startBtn.textContent = `🎲 Нужно минимум 3 участника (сейчас ${participantCount})`;
                 } else {
-                    startBtn.textContent = '🎲 Начать розыгрыш';
+                    startBtn.textContent = '🎲 Начать игру';
                 }
-
                 leaveBtn.classList.add('hidden');
             } else {
                 startBtn.classList.add('hidden');
                 transferBtn.classList.add('hidden');
-
                 if (!room.started) {
                     leaveBtn.classList.remove('hidden');
                 } else {
@@ -1559,146 +1521,139 @@
         async function startGame() {
             if (!currentRoomCode) return;
 
-            if (!confirm('Начать розыгрыш? После этого нельзя будет добавить новых участников.')) {
+            if (!confirm('Начать игру? После этого нельзя будет добавить новых участников.')) {
                 return;
             }
 
-            showLoader('Запускаем розыгрыш...');
+            showLoader('Запуск игры...');
+
             try {
-                const response = await fetch(`${API_URL}rooms/${currentRoomCode}/start?telegramid=${currentUserId}`, {
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/start?telegram_id=${currentUserId}`, {
                     method: 'POST'
                 });
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail);
+                    throw new Error(error.detail || 'Ошибка при запуске игры');
                 }
 
                 hideLoader();
                 await loadAssignment(currentRoomCode);
-                tg.showAlert('Розыгрыш завершён! Смотри, кому ты даришь подарок.');
+                tg.showAlert('Игра началась! Все участники получили уведомления.');
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert(error.message);
+                tg.showAlert(error.message || 'Ошибка при запуске игры');
             }
         }
 
         async function loadAssignment(code) {
-            showLoader('Получаем результаты...');
-            try {
-                const response = await fetch(`${API_URL}rooms/${code}/assignment/${currentUserId}`);
-                if (!response.ok) throw new Error();
+            showLoader('Загрузка назначения...');
 
+            try {
+                const response = await fetch(`${API_URL}/rooms/${code}/assignment/${currentUserId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Назначение не найдено');
+                }
+                
                 const assignment = await response.json();
                 hideLoader();
                 showAssignment(assignment);
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert('Ошибка загрузки назначения: ' + error.message);
+                tg.showAlert('Ошибка при загрузке назначения: ' + error.message);
             }
         }
 
         function showAssignment(assignment) {
-            document.getElementById('assignmentName').textContent = assignment.receivername;
-
+            document.getElementById('assignmentName').textContent = assignment.receiver_name;
+            
             const usernameEl = document.getElementById('assignmentUsername');
-            if (assignment.receiverusername) {
-                usernameEl.href = `https://t.me/${assignment.receiverusername}`;
-                usernameEl.textContent = `@${assignment.receiverusername}`;
-                usernameEl.style.display = 'inline-block';
+            if (assignment.receiver_username) {
+                usernameEl.textContent = `@${assignment.receiver_username}`;
+                usernameEl.style.display = 'block';
             } else {
                 usernameEl.style.display = 'none';
             }
-
-            // Аватарка получателя
-            const avatarContainer = document.getElementById('assignmentAvatar');
-            const photoUrl = getUserPhotoUrl(assignment.receivertelegramid);
             
-            if (photoUrl) {
-                const img = document.createElement('img');
-                img.src = photoUrl;
-                img.alt = assignment.receivername;
-                img.onerror = function() {
-                    avatarContainer.innerHTML = assignment.receivername.charAt(0).toUpperCase();
-                };
-                avatarContainer.innerHTML = '';
-                avatarContainer.appendChild(img);
-            } else {
-                avatarContainer.textContent = assignment.receivername.charAt(0).toUpperCase();
-            }
-
             document.getElementById('assignmentBudget').textContent = `${assignment.budget}₽`;
-            document.getElementById('assignmentLocation').textContent = assignment.exchangelocation;
-            document.getElementById('assignmentWish').textContent = assignment.receiverwish || 'Не указано';
-
+            document.getElementById('assignmentLocation').textContent = assignment.exchange_location || 'Уточнется';
+            document.getElementById('assignmentWish').textContent = 
+                assignment.receiver_wish || 'Участник не указал пожелания';
+            
             showScreen('assignmentScreen');
         }
 
         async function leaveRoom() {
             if (!currentRoomCode) return;
 
-            if (!confirm('Ты уверен, что хочешь покинуть комнату?')) {
+            if (!confirm('Вы уверены, что хотите покинуть комнату?')) {
                 return;
             }
 
-            showLoader('Выходим из комнаты...');
+            showLoader('Выход из комнаты...');
+
             try {
-                const response = await fetch(`${API_URL}rooms/${currentRoomCode}/leave?telegramid=${currentUserId}`, {
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}/leave?telegram_id=${currentUserId}`, {
                     method: 'POST'
                 });
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail);
+                    throw new Error(error.detail || 'Ошибка при выходе из комнаты');
                 }
 
                 hideLoader();
-                tg.showAlert('Ты покинул комнату');
+                tg.showAlert('Вы покинули комнату');
                 showMainMenu();
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert(error.message);
+                tg.showAlert(error.message || 'Ошибка при выходе из комнаты');
             }
         }
 
         async function removeParticipant(participantId) {
             if (!currentRoomCode) return;
 
-            if (!confirm('Удалить этого участника?')) {
+            if (!confirm('Удалить этого участника из комнаты?')) {
                 return;
             }
 
-            showLoader('Удаляем участника...');
+            showLoader('Удаление участника...');
+
             try {
                 const response = await fetch(
-                    `${API_URL}rooms/${currentRoomCode}/participant/${participantId}?admintelegramid=${currentUserId}`,
+                    `${API_URL}/rooms/${currentRoomCode}/participant/${participantId}?admin_telegram_id=${currentUserId}`,
                     { method: 'DELETE' }
                 );
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail);
+                    throw new Error(error.detail || 'Ошибка при удалении участника');
                 }
 
                 hideLoader();
-                tg.showAlert('Участник удалён');
+                tg.showAlert('Участник удален');
                 await loadRoomFromAPI(currentRoomCode);
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert(error.message);
+                tg.showAlert(error.message || 'Ошибка при удалении участника');
             }
         }
 
         function copyRoomCode() {
             const code = document.getElementById('displayCode').textContent;
+            
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(code)
-                    .then(() => tg.showAlert(`Код ${code} скопирован!`))
-                    .catch(() => fallbackCopy(code));
+                navigator.clipboard.writeText(code).then(() => {
+                    tg.showAlert('Код скопирован: ' + code);
+                }).catch(() => {
+                    fallbackCopy(code);
+                });
             } else {
                 fallbackCopy(code);
             }
@@ -1713,29 +1668,30 @@
             textarea.select();
             try {
                 document.execCommand('copy');
-                tg.showAlert(`Код ${text} скопирован!`);
+                tg.showAlert('Код скопирован: ' + text);
             } catch (err) {
-                tg.showAlert(`Код: ${text}`);
+                tg.showAlert('Код комнаты: ' + text);
             }
             document.body.removeChild(textarea);
         }
 
         function shareRoom() {
             if (!currentRoomCode) return;
-
-            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join${currentRoomCode}`;
-            const shareText = `Присоединяйся к игре Тайный Санта! Код комнаты: ${currentRoomCode}`;
-
+            
+            const shareUrl = `https://t.me/${BOT_USERNAME}?start=join_${currentRoomCode}`;
+            const shareText = `🎅 Присоединяйся к игре "Тайный Санта"!\n\nКод комнаты: ${currentRoomCode}`;
+            
             if (tg.openTelegramLink) {
                 const encodedText = encodeURIComponent(shareText);
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodedText}`);
             } else {
-                const fullText = `${shareText}\n${shareUrl}`;
+                const fullText = `${shareText}\n\n${shareUrl}`;
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(fullText)
-                        .then(() => tg.showAlert('Ссылка скопирована! Отправь её друзьям.'));
+                    navigator.clipboard.writeText(fullText).then(() => {
+                        tg.showAlert('Ссылка скопирована! Отправьте её друзьям.');
+                    });
                 } else {
-                    tg.showAlert(fullText);
+                    tg.showAlert(`Отправьте друзьям:\n${fullText}`);
                 }
             }
         }
@@ -1743,46 +1699,34 @@
         async function showTransferAdmin() {
             if (!currentRoomCode) return;
 
-            showLoader('Загружаем участников...');
+            showLoader('Загрузка участников...');
+
             try {
-                const response = await fetch(`${API_URL}rooms/${currentRoomCode}?telegramid=${currentUserId}`);
-                if (!response.ok) throw new Error();
-
+                const response = await fetch(`${API_URL}/rooms/${currentRoomCode}?telegram_id=${currentUserId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки комнаты');
+                
                 const room = await response.json();
-                const participants = room.participants.filter(p => p.telegramid !== currentUserId);
-
+                const participants = room.participants.filter(p => p.telegram_id !== currentUserId);
+                
                 hideLoader();
-
+                
                 if (participants.length === 0) {
                     tg.showAlert('Нет других участников для передачи прав');
                     return;
                 }
 
-                const listHtml = participants.map(p => {
-                    const photoUrl = getUserPhotoUrl(p.telegramid);
-                    let avatarHtml = '';
-                    if (photoUrl) {
-                        avatarHtml = `
-                            <div class="participant-avatar">
-                                <img src="${photoUrl}" alt="${p.name}" onerror="this.parentElement.innerHTML='${p.name.charAt(0).toUpperCase()}'">
-                            </div>
-                        `;
-                    } else {
-                        avatarHtml = `<div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>`;
-                    }
-
-                    return `
-                        <div class="participant" style="margin-bottom: 10px;">
-                            ${avatarHtml}
-                            <div class="participant-info">
-                                <div class="participant-name">${p.name}</div>
-                            </div>
-                            <button class="btn btn-warning" style="width: auto; padding: 8px 16px; margin: 0;" onclick="transferAdminTo('${p.telegramid}', '${p.name}')">
-                                Передать
-                            </button>
+                const listHtml = participants.map(p => `
+                    <div class="participant" style="margin-bottom: 10px;">
+                        <div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">${p.name}</div>
                         </div>
-                    `;
-                }).join('');
+                        <button class="btn btn-warning" style="width: auto; padding: 8px 16px; margin: 0;" 
+                                onclick="transferAdminTo('${p.telegram_id}', '${p.name}')">
+                            Передать
+                        </button>
+                    </div>
+                `).join('');
 
                 document.getElementById('transferAdminList').innerHTML = listHtml;
                 showScreen('transferAdminScreen');
@@ -1794,24 +1738,29 @@
         }
 
         async function transferAdminTo(newAdminId, newAdminName) {
-            if (!confirm(`Передать права администратора ${newAdminName}?`)) {
+            if (!confirm(`Передать права администратора пользователю ${newAdminName}?`)) {
                 return;
             }
 
-            showLoader('Передаём права...');
+            showLoader('Передача прав...');
+
             try {
                 const response = await fetch(
-                    `${API_URL}rooms/${currentRoomCode}/transfer-admin?currentadminid=${currentUserId}`,
+                    `${API_URL}/rooms/${currentRoomCode}/transfer-admin?current_admin_id=${currentUserId}`,
                     {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ newadmintelegramid: newAdminId })
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            new_admin_telegram_id: newAdminId
+                        })
                     }
                 );
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail);
+                    throw new Error(error.detail || 'Ошибка передачи прав');
                 }
 
                 hideLoader();
@@ -1820,7 +1769,7 @@
             } catch (error) {
                 hideLoader();
                 console.error('Error:', error);
-                tg.showAlert(error.message);
+                tg.showAlert(error.message || 'Ошибка передачи прав');
             }
         }
 
@@ -1832,17 +1781,18 @@
             }
         }
 
-        // INITIALIZATION
+        // ============= INITIALIZATION =============
         window.addEventListener('load', async () => {
             createSnowflakes();
-            loadSavedTheme();
+            loadSavedTheme(); // Загружаем сохранённую тему
+            
             showLoader('Инициализация...');
 
             const user = tg.initDataUnsafe?.user;
             if (user) {
                 currentUserId = user.id.toString();
                 currentUserName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                currentUsername = user.username;
+                currentUsername = user.username || '';
                 
                 document.getElementById('creatorName').value = currentUserName;
                 document.getElementById('joinName').value = currentUserName;
@@ -1850,56 +1800,62 @@
                 currentUserId = 'demo_' + Math.random().toString(36).substr(2, 9);
             }
 
-            // startparam (deep links)
+            // Обработка start_param для deep links
             let startParam = null;
             
             if (tg.initDataUnsafe?.start_param) {
                 startParam = tg.initDataUnsafe.start_param;
-                console.log('Start param (initDataUnsafe):', startParam);
+                console.log('Start param из initDataUnsafe:', startParam);
             }
             
             const hashParams = new URLSearchParams(window.location.hash.slice(1));
             const hashStartParam = hashParams.get('tgWebAppStartParam');
             if (hashStartParam) {
                 startParam = hashStartParam;
-                console.log('Start param (URL hash):', startParam);
+                console.log('Start param из URL hash:', startParam);
             }
 
-            // startparam
-            if (startParam && startParam.startsWith('join')) {
-                const roomCode = startParam.replace('join', '').toUpperCase();
-                console.log('Извлечён код комнаты:', roomCode);
+            // Обрабатываем start_param
+            if (startParam && startParam.startsWith('join_')) {
+                const roomCode = startParam.replace('join_', '').toUpperCase();
+                console.log('Обработка кода комнаты:', roomCode);
                 
+                // Проверяем, есть ли пользователь уже в этой комнате
                 try {
-                    const response = await fetch(`${API_URL}rooms/${roomCode}?telegramid=${currentUserId}`);
+                    const response = await fetch(`${API_URL}/rooms/${roomCode}?telegram_id=${currentUserId}`);
+                    
                     if (response.ok) {
                         const room = await response.json();
-                        
-                        const isParticipant = room.participants.some(p => p.telegramid === currentUserId);
+                        // Проверяем, является ли пользователь участником
+                        const isParticipant = room.participants.some(p => p.telegram_id === currentUserId);
                         
                         if (isParticipant) {
+                            // Пользователь уже в комнате - открываем её
                             console.log('Пользователь уже участник, открываем комнату');
                             currentRoomCode = roomCode;
                             hideLoader();
                             displayRoom(roomCode, room);
                             showScreen('roomScreen');
+                            
                             if (room.started) {
                                 await loadAssignment(roomCode);
                             }
                         } else {
-                            console.log('Пользователь не участник, открываем форму присоединения');
+                            // Пользователь не в комнате - показываем форму присоединения
+                            console.log('Пользователь не участник, показываем форму');
                             document.getElementById('joinCode').value = roomCode;
                             hideLoader();
                             showJoinRoom();
                         }
                     } else {
-                        console.log('Комната не найдена, открываем форму присоединения');
+                        // Комната не найдена или ошибка - показываем форму присоединения
+                        console.log('Комната не найдена, показываем форму');
                         document.getElementById('joinCode').value = roomCode;
                         hideLoader();
                         showJoinRoom();
                     }
                 } catch (error) {
-                    console.error('Ошибка при загрузке комнаты:', error);
+                    console.error('Ошибка проверки комнаты:', error);
                     document.getElementById('joinCode').value = roomCode;
                     hideLoader();
                     showJoinRoom();
