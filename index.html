@@ -397,6 +397,8 @@
         .input-group input,
         .input-group textarea {
             width: 100%;
+            max-width: 100%; /* Добавлено */
+            min-width: 0; /* Добавлено */
             padding: 16px;
             background: var(--input-bg);
             backdrop-filter: blur(20px);
@@ -406,6 +408,7 @@
             color: var(--text-primary);
             transition: all 0.3s ease;
             font-family: inherit;
+            box-sizing: border-box; /* Убедитесь что это есть */
         }
 
         .input-group input::placeholder,
