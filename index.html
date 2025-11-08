@@ -381,6 +381,7 @@
         .input-group {
             margin-bottom: 20px;
             animation: fadeSlideUp 0.6s ease-out backwards;
+            overflow: hidden; /* Добавьте эту строку */
         }
 
         .input-group:nth-child(2) { animation-delay: 0.1s; }
@@ -410,6 +411,45 @@
             transition: all 0.3s ease;
             font-family: inherit;
             box-sizing: border-box; /* Убедитесь что это есть */
+        }
+
+        /* Специальное правило именно для поля даты */
+        .input-group input[type="date"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            padding: 16px !important;
+            font-size: 16px !important;
+            -webkit-appearance: none;
+            appearance: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Дополнительно для iOS Safari */
+        @supports (-webkit-touch-callout: none) {
+            .input-group input[type="date"] {
+                display: block;
+                width: calc(100% - 2px) !important;
+            }
+            
+            .input-group input[type="date"]::-webkit-date-and-time-value {
+                text-align: left;
+                width: 100%;
+            }
+            
+            .input-group input[type="date"]::-webkit-calendar-picker-indicator {
+                background: transparent;
+                bottom: 0;
+                color: transparent;
+                cursor: pointer;
+                height: auto;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+            }
         }
 
         .input-group input::placeholder,
