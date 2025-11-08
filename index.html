@@ -1774,10 +1774,48 @@
             // Обрабатываем start_param
             if (startParam && startParam.startsWith('join_')) {
                 const roomCode = startParam.replace('join_', '').toUpperCase();
-                console.log('Автозаполнение кода комнаты:', roomCode);
-                document.getElementById('joinCode').value = roomCode;
-                hideLoader();
-                showJoinRoom();
+                console.log('Обработка кода комнаты:', roomCode);
+                
+                // Проверяем, есть ли пользователь уже в этой комнате
+                try {
+                    const response = await fetch(`${API_URL}/rooms/${roomCode}?telegram_id=${currentUserId}`);
+                    
+                    if (response.ok) {
+                        const room = await response.json();
+                        // Проверяем, является ли пользователь участником
+                        const isParticipant = room.participants.some(p => p.telegram_id === currentUserId);
+                        
+                        if (isParticipant) {
+                            // Пользователь уже в комнате - открываем её
+                            console.log('Пользователь уже участник, открываем комнату');
+                            currentRoomCode = roomCode;
+                            hideLoader();
+                            displayRoom(roomCode, room);
+                            showScreen('roomScreen');
+                            
+                            if (room.started) {
+                                await loadAssignment(roomCode);
+                            }
+                        } else {
+                            // Пользователь не в комнате - показываем форму присоединения
+                            console.log('Пользователь не участник, показываем форму');
+                            document.getElementById('joinCode').value = roomCode;
+                            hideLoader();
+                            showJoinRoom();
+                        }
+                    } else {
+                        // Комната не найдена или ошибка - показываем форму присоединения
+                        console.log('Комната не найдена, показываем форму');
+                        document.getElementById('joinCode').value = roomCode;
+                        hideLoader();
+                        showJoinRoom();
+                    }
+                } catch (error) {
+                    console.error('Ошибка проверки комнаты:', error);
+                    document.getElementById('joinCode').value = roomCode;
+                    hideLoader();
+                    showJoinRoom();
+                }
             } else {
                 hideLoader();
                 await loadUserRooms();
