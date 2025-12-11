@@ -761,6 +761,12 @@
         .assignment-avatar-placeholder {
             font-size: 48px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: white;
         }
 
         .assignment-name {
@@ -1309,7 +1315,7 @@
 
         const API_URL = window.location.hostname === 'localhost'
             ? 'http://127.0.0.1:8002/api'
-            : 'https://secretsantadrawprivate.onrender.com/api';
+            : 'https://secretsantadrawprivate.onrender.com';
 
         const BOT_USERNAME = 'SecretSantaDrawBot';
 
@@ -1566,13 +1572,15 @@
                     <div class="room-list-item" onclick="openRoom('${room.code}')">
                         <h4>${room.name}</h4>
                         <p>👥 Участников: ${room.participant_count} • 💰 Бюджет: ${(() => {
-                            if (room.budget_min !== undefined && room.budget_max !== undefined) {
+                            // Проверяем диапазон бюджета (учитываем null и undefined)
+                            if (room.budget_min != null && room.budget_max != null) {
                                 if (room.budget_min === room.budget_max) {
                                     return `${room.budget_min}₽`;
                                 } else {
                                     return `${room.budget_min}-${room.budget_max}₽`;
                                 }
-                            } else if (room.budget !== undefined) {
+                            } else if (room.budget != null) {
+                                // Обратная совместимость со старым форматом
                                 return `${room.budget}₽`;
                             } else {
                                 return 'не указан';
@@ -1758,8 +1766,14 @@
                 const shouldBlur = room.hide_participants && !room.is_creator && !room.started;
                 
                 participantsList.innerHTML = participants.map(p => {
+                    // Создаем HTML для аватарки в кружочке
                     const avatarHtml = p.telegram_id ? 
-                        `<div class="participant-avatar"><img src="${getTelegramAvatarUrl(p.telegram_id)}" onerror="this.style.display='none'; this.parentElement.textContent='${p.name.charAt(0).toUpperCase()}'"></div>` :
+                        `<div class="participant-avatar">
+                            <img src="${getTelegramAvatarUrl(p.telegram_id)}" 
+                                 alt="${p.name}" 
+                                 onerror="this.style.display='none'; this.parentElement.textContent='${p.name.charAt(0).toUpperCase()}'">
+                            <span style="display: none;">${p.name.charAt(0).toUpperCase()}</span>
+                        </div>` :
                         `<div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>`;
                     
                     return `
@@ -1941,21 +1955,35 @@
         function showAssignment(assignment) {
             receiverTelegramId = assignment.receiver_telegram_id;
             
-            // Устанавливаем аватарку
+            // Устанавливаем аватарку в кружочке
             const avatarContainer = document.getElementById('assignmentAvatar');
             const placeholder = document.getElementById('assignmentAvatarPlaceholder');
+            
+            // Очищаем контейнер
+            avatarContainer.innerHTML = '';
             
             if (receiverTelegramId) {
                 const img = document.createElement('img');
                 img.src = getTelegramAvatarUrl(receiverTelegramId);
+                img.alt = assignment.receiver_name;
                 img.onerror = function() {
+                    // Если аватарка не загрузилась, показываем первую букву
                     this.style.display = 'none';
                     placeholder.textContent = assignment.receiver_name.charAt(0).toUpperCase();
+                    placeholder.style.display = 'flex';
                 };
-                avatarContainer.innerHTML = '';
+                img.onload = function() {
+                    // Скрываем placeholder когда аватарка загрузилась
+                    placeholder.style.display = 'none';
+                };
                 avatarContainer.appendChild(img);
-            } else {
+                // Показываем placeholder с первой буквой пока загружается аватарка
                 placeholder.textContent = assignment.receiver_name.charAt(0).toUpperCase();
+                placeholder.style.display = 'flex';
+            } else {
+                // Если нет telegram_id, показываем только первую букву
+                placeholder.textContent = assignment.receiver_name.charAt(0).toUpperCase();
+                placeholder.style.display = 'flex';
             }
             
             document.getElementById('assignmentName').textContent = assignment.receiver_name;
@@ -2110,8 +2138,14 @@
                 }
 
                 const listHtml = participants.map(p => {
+                    // Создаем HTML для аватарки в кружочке
                     const avatarHtml = p.telegram_id ? 
-                        `<div class="participant-avatar"><img src="${getTelegramAvatarUrl(p.telegram_id)}" onerror="this.style.display='none'; this.parentElement.textContent='${p.name.charAt(0).toUpperCase()}'"></div>` :
+                        `<div class="participant-avatar">
+                            <img src="${getTelegramAvatarUrl(p.telegram_id)}" 
+                                 alt="${p.name}" 
+                                 onerror="this.style.display='none'; this.parentElement.textContent='${p.name.charAt(0).toUpperCase()}'">
+                            <span style="display: none;">${p.name.charAt(0).toUpperCase()}</span>
+                        </div>` :
                         `<div class="participant-avatar">${p.name.charAt(0).toUpperCase()}</div>`;
                     
                     return `
