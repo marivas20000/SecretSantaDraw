@@ -1066,8 +1066,13 @@
             </div>
 
             <div class="input-group">
-                <label>Максимальный бюджет (₽)</label>
-                <input type="number" id="roomBudget" placeholder="1000">
+                <label>Бюджет от (₽)</label>
+                <input type="number" id="roomBudgetMin" placeholder="500" min="0">
+            </div>
+
+            <div class="input-group">
+                <label>Бюджет до (₽)</label>
+                <input type="number" id="roomBudgetMax" placeholder="1000" min="0">
             </div>
 
             <div class="input-group">
@@ -1304,7 +1309,7 @@
 
         const API_URL = window.location.hostname === 'localhost'
             ? 'http://127.0.0.1:8002/api'
-            : 'https://secretsantadrawprivate.onrender.com';
+            : 'https://secretsantadrawprivate.onrender.com/api';
 
         const BOT_USERNAME = 'SecretSantaDrawBot';
 
